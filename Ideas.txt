@@ -6,3 +6,5 @@ save button to save to SD card
 centre around average point
 zoom in and out at average point
 check vbc file format 
+move lat and long to in the "graph" and make it small/remove lat and long
+Add a looping button to determine if points are for subject, T1, T2, or T3
