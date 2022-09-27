@@ -1,0 +1,8 @@
+coldstart button - beep
+set button - noise when set
+pop up when max cp set
+pop up when no RTK when trying to set
+save button to save to SD card
+centre around average point
+zoom in and out at average point
+check vbc file format 
