@@ -1,0 +1,443 @@
+internal const UInt16 VbcEndian = 0xAA55;  // This value may need to change to 0x55AA depending on your processor
+
+internal const string VbcHeader = "RLVB3iCFG";
+
+internal const float PointNotSet = -6500000.00f;
+
+internal const float HeadingNotSet = -1.0f;
+
+public enum VbcStructureType : Int32
+        {
+            Comments             = 0x00000001,
+            SingleLane           = 0x00000002,
+            CornerInfo           = 0x00000003,
+            StaticPoints         = 0x00000004,
+            ContactPointsSubject = 0x00000005,
+            ContactPointsTarget1 = 0x00000006,
+            ContactPointsTarget2 = 0x00000007,
+            RobotVehicoSettings  = 0x00000008,
+            ContactPointsTarget3 = 0x00000009,
+            ReferenceHeading     = 0x0000000A
+        }
+
+public static FileInfo SaveVehiclePoints(string fileName, Geodetics.Geodetic reference, Geodetics.Geodetic referencePoint2, VbcStructureType vehicleType, List<Geodetics.Geodetic> vehicleContactPoints, List<Geodetics.LocalTangentPlane> lineReferencePoints)
+        {
+            ushort versionToSaveAs = 0;
+            return Disposable.Using(
+                         () => new BinaryWriter(new FileStream(fileName, FileMode.Create)),
+                         writer =>
+                         {
+                             writer
+                             .Append(VbcHeader)
+                             .Append(VbcEndian)
+                             .Append(versionToSaveAs)
+                             .Append(GetVehicleVbcStructureTypes(vehicleType, vehicleContactPoints?.Count ?? 0, lineReferencePoints?.Count ?? 0))
+                             .AppendVehicleContactPoints(vehicleType, vehicleContactPoints, reference, referencePoint2, versionToSaveAs)
+                             .AppendLineReferencePoints(lineReferencePoints, versionToSaveAs);
+
+                             return new FileInfo(fileName);
+                         });
+
+        }
+		
+private static UInt32 GetVehicleVbcStructureTypes(VbcStructureType vehicleType, int numberOfVehiclePoints, int numberOfLineReferencePoints)
+        {
+            if (numberOfVehiclePoints + numberOfLineReferencePoints == 0) throw new ArgumentException("VBoxConfigurationFiles.GetVehicleVbcStructureTypes numberOfVehiclePoints and numberOfLineReferencePoints cannot both be zero.");
+            Int32 result = 0;
+            if (numberOfVehiclePoints > 0) result |= 1 << (Int32)vehicleType;
+            if (numberOfLineReferencePoints > 0) result |= 1 << (Int32)VbcStructureType.CornerInfo;
+
+            return Convert.ToUInt32(result);
+        }		
+		
+internal static BinaryWriter AppendVehicleContactPoints(
+            this BinaryWriter @this, 
+            VBoxConfigurationFiles.VbcStructureType vehicleType, 
+            List<Geodetics.Geodetic> vehicleContactPoints, 
+            Geodetics.Geodetic reference, 
+            Geodetics.Geodetic referencePoint2,
+            ushort versionToSaveAs)
+        {
+            if (vehicleContactPoints?.Count > 0)
+            {
+                int numberOfPoints = vehicleContactPoints.Count;
+                while (vehicleContactPoints.Count < 24)
+                {
+                    vehicleContactPoints.Add(new Geodetics.Geodetic(LaneDefinition.PointNotSet, LaneDefinition.PointNotSet, LaneDefinition.PointNotSet));
+                }
+
+                List<Geodetics.LocalTangentPlane> notUsed = new List<Geodetics.LocalTangentPlane>(24);
+                for (int i = 0; i < 24; i++)
+                {
+                    notUsed.Add(new Geodetics.LocalTangentPlane(LaneDefinition.PointNotSet, LaneDefinition.PointNotSet, LaneDefinition.PointNotSet));
+                }
+
+                if (versionToSaveAs == 0)
+                {
+                    @this
+                           .Append((UInt32)vehicleType)
+                           .AppendStringWithLength("Vehicle contact points")
+                           // write out the payload length - 4 bytes structure ID, 4 bytes number of points, 8 bytes reference.Latitude, 8 bytes reference.Longitude, 8 bytes reference.Altitude, 80 bytes contact point settings, (24 * 24) bytes data as geodetic, (24 * 16) bytes data as NED, there must be 24 points written to the file
+                           .Append((UInt16)(16 + (8 * 3) + (4 * 4) + (4 * 4) + (8 * 3) + (8 * 3) + (24 * 24) + (24 * 16)))
+                           .Append((UInt32)LaneTypeDefinition.VehicleSeparationPolygon)
+                           .Append(numberOfPoints)
+                           .Append(reference.Latitude)
+                           .Append(reference.Longitude)
+                           .Append(reference.Altitude)
+                           // Add contact point settings
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.HeadingNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.HeadingNotSet)
+                           .Append(reference.Latitude)
+                           .Append(reference.Longitude)
+                           .Append(reference.Altitude)
+                           .Append(referencePoint2.Latitude)
+                           .Append(referencePoint2.Longitude)
+                           .Append(referencePoint2.Altitude)
+                           .Append(vehicleContactPoints)
+                           .Append(notUsed);
+                }
+                else
+                {
+                    @this
+                        .Append((UInt32)vehicleType)
+                        .AppendStringWithLength("Vehicle contact points")
+                        // write out the payload length - 4 bytes structure ID, 4 bytes number of points, 8 bytes reference.Latitude, 8 bytes reference.Longitude, 8 bytes reference.Altitude, 80 bytes contact point settings, (24 * 24) bytes data as geodetic, (24 * 16) bytes data as NED, there must be 24 points written to the file
+                        .Append((UInt32)(16 + (8 * 3) + (4 * 4) + (4 * 4) + (8 * 3) + (8 * 3) + (24 * 24) + (24 * 16)))
+                        .Append((UInt32)LaneTypeDefinition.VehicleSeparationPolygon)
+                        .Append(numberOfPoints)
+                        .Append(reference.Latitude)
+                        .Append(reference.Longitude)
+                        .Append(reference.Altitude)
+                        // Add contact point settings
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.HeadingNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.HeadingNotSet)
+                        .Append(reference.Latitude)
+                        .Append(reference.Longitude)
+                        .Append(reference.Altitude)
+                        .Append(referencePoint2.Latitude)
+                        .Append(referencePoint2.Longitude)
+                        .Append(referencePoint2.Altitude)
+                        .Append(vehicleContactPoints)
+                        .Append(notUsed);
+                }
+            }
+
+            return @this;
+        }		
+		
+internal static BinaryWriter AppendLineReferencePoints(this BinaryWriter @this, List<Geodetics.LocalTangentPlane> lineReferencePoints, ushort versionToSaveAs)
+        {
+            if (lineReferencePoints?.Count > 0)
+            {
+                while (lineReferencePoints.Count < 4)
+                {
+                    lineReferencePoints.Add(new Geodetics.LocalTangentPlane(LaneDefinition.PointNotSet, LaneDefinition.PointNotSet, LaneDefinition.PointNotSet));
+                }
+
+                if (versionToSaveAs == 0)
+                {
+                    @this
+                        .Append((UInt32)VBoxConfigurationFiles.VbcStructureType.CornerInfo)
+                        .AppendStringWithLength("Line reference points")
+                        // write out the payload length - 4 * cornerInfo_t
+                        .Append((UInt16)(4 * 12))
+                        .Append(lineReferencePoints, false);
+                }
+                else
+                {
+                    @this
+                        .Append((UInt32)VBoxConfigurationFiles.VbcStructureType.CornerInfo)
+                        .AppendStringWithLength("Line reference points")
+                        // write out the payload length - 4 * cornerInfo_t
+                        .Append((UInt32)(4 * 12))
+                        .Append(lineReferencePoints, false);
+                }
+            }
+
+            return @this;
+        }
+
+
+static class VbcBinaryWriterExtensionMethods
+    {
+        internal static BinaryWriter AppendVbcStructureType(this BinaryWriter @this, VBoxConfigurationFiles.VbcStructureType vbcStructure)
+        {
+            @this.Write((UInt32)vbcStructure);
+            return @this;
+        }
+
+        internal static BinaryWriter AppendStringWithLength(this BinaryWriter @this, string value)
+        {
+            var temp = new ASCIIEncoding().GetBytes(value);
+            @this.Append(unchecked((short)temp.Length)).Write(temp);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, string value)
+        {
+            @this.Write(new ASCIIEncoding().GetBytes(value));
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, double value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, Single value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, Int64 value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, UInt64 value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, Int32 value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, UInt32 value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, Int16 value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, UInt16 value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, byte value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, sbyte value)
+        {
+            @this.Write(value);
+            return @this;
+        }
+
+        internal static BinaryWriter AppendWhen(this BinaryWriter @this, Func<bool> predicate, Single value)
+        {
+            if (predicate())
+            {
+                @this.Append(value);
+            }
+
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, List<(Geodetics.LocalTangentPlane ned, double heading)> data, bool addHeading = true, bool addCurvature = false)
+        {
+            for (int i = 0; i < data.Count; i++)
+            {
+                @this
+                    .Append((Single)data[i].ned.East)
+                    .Append((Single)data[i].ned.North)
+                    .Append((Single)data[i].ned.Down)
+                    .AppendWhen(() => addHeading, i == 0 ? 0.0f :(Single)data[i].heading)
+                    .AppendWhen(() => addCurvature, LaneDefinition.GetCurvature(data, i));
+            }
+
+            return @this;
+        }
+
+
+        internal static BinaryWriter Append(this BinaryWriter @this, List<Geodetics.LocalTangentPlane> data, bool addHeading = true, bool addCurvature = false)
+        {
+            for (int i = 0; i < data.Count; i++)
+            {
+                @this
+                    .Append((Single)data[i].East)
+                    .Append((Single)data[i].North)
+                    .Append((Single)data[i].Down)
+                    .AppendWhen(() => addHeading, i == 0 ? 0.0f : (Single)Core.Maths.CalculateAngle(data[i - 1].East, data[i - 1].North, data[i].East, data[i].North))
+                    .AppendWhen(() => addCurvature, LaneDefinition.GetCurvature(data, i));
+            }
+
+            return @this;            
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, List<(Geodetics.LocalTangentPlane point, double? heading)> data)
+        {
+            data.ForEach(d => @this
+            .Append((Single)d.point.East)
+            .Append((Single)d.point.North)
+            .Append((Single)d.point.Down)
+            .Append(LaneDefinition.PointNotSet)
+            .Append(LaneDefinition.PointNotSet)
+            .Append(LaneDefinition.PointNotSet)
+            .Append(d.heading.HasValue ? (Single)d.heading : LaneDefinition.HeadingNotSet));
+
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, List<Geodetics.Geodetic> points)
+        {
+            points.ForEach(p => @this
+            .Append(p.Latitude)
+            .Append(p.Longitude)
+            .Append(p.Altitude));
+            return @this;
+        }
+
+        internal static BinaryWriter Append(this BinaryWriter @this, StaticPointSettings settings)
+        {
+            @this.Append(settings.XLatOffset).Append(settings.YLngOffset).Append(settings.DistanceMax).Append(settings.DistanceMin).Append(settings.AngleMin).Append(settings.AngleMax);
+            return @this;
+        }
+
+        internal static BinaryWriter AppendVehicleContactPoints(
+            this BinaryWriter @this, 
+            VBoxConfigurationFiles.VbcStructureType vehicleType, 
+            List<Geodetics.Geodetic> vehicleContactPoints, 
+            Geodetics.Geodetic reference, 
+            Geodetics.Geodetic referencePoint2,
+            ushort versionToSaveAs)
+        {
+            if (vehicleContactPoints?.Count > 0)
+            {
+                int numberOfPoints = vehicleContactPoints.Count;
+                while (vehicleContactPoints.Count < 24)
+                {
+                    vehicleContactPoints.Add(new Geodetics.Geodetic(LaneDefinition.PointNotSet, LaneDefinition.PointNotSet, LaneDefinition.PointNotSet));
+                }
+
+                List<Geodetics.LocalTangentPlane> notUsed = new List<Geodetics.LocalTangentPlane>(24);
+                for (int i = 0; i < 24; i++)
+                {
+                    notUsed.Add(new Geodetics.LocalTangentPlane(LaneDefinition.PointNotSet, LaneDefinition.PointNotSet, LaneDefinition.PointNotSet));
+                }
+
+                if (versionToSaveAs == 0)
+                {
+                    @this
+                           .Append((UInt32)vehicleType)
+                           .AppendStringWithLength("Vehicle contact points")
+                           // write out the payload length - 4 bytes structure ID, 4 bytes number of points, 8 bytes reference.Latitude, 8 bytes reference.Longitude, 8 bytes reference.Altitude, 80 bytes contact point settings, (24 * 24) bytes data as geodetic, (24 * 16) bytes data as NED, there must be 24 points written to the file
+                           .Append((UInt16)(16 + (8 * 3) + (4 * 4) + (4 * 4) + (8 * 3) + (8 * 3) + (24 * 24) + (24 * 16)))
+                           .Append((UInt32)LaneTypeDefinition.VehicleSeparationPolygon)
+                           .Append(numberOfPoints)
+                           .Append(reference.Latitude)
+                           .Append(reference.Longitude)
+                           .Append(reference.Altitude)
+                           // Add contact point settings
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.HeadingNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.PointNotSet)
+                           .Append(LaneDefinition.HeadingNotSet)
+                           .Append(reference.Latitude)
+                           .Append(reference.Longitude)
+                           .Append(reference.Altitude)
+                           .Append(referencePoint2.Latitude)
+                           .Append(referencePoint2.Longitude)
+                           .Append(referencePoint2.Altitude)
+                           .Append(vehicleContactPoints)
+                           .Append(notUsed);
+                }
+                else
+                {
+                    @this
+                        .Append((UInt32)vehicleType)
+                        .AppendStringWithLength("Vehicle contact points")
+                        // write out the payload length - 4 bytes structure ID, 4 bytes number of points, 8 bytes reference.Latitude, 8 bytes reference.Longitude, 8 bytes reference.Altitude, 80 bytes contact point settings, (24 * 24) bytes data as geodetic, (24 * 16) bytes data as NED, there must be 24 points written to the file
+                        .Append((UInt32)(16 + (8 * 3) + (4 * 4) + (4 * 4) + (8 * 3) + (8 * 3) + (24 * 24) + (24 * 16)))
+                        .Append((UInt32)LaneTypeDefinition.VehicleSeparationPolygon)
+                        .Append(numberOfPoints)
+                        .Append(reference.Latitude)
+                        .Append(reference.Longitude)
+                        .Append(reference.Altitude)
+                        // Add contact point settings
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.HeadingNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.PointNotSet)
+                        .Append(LaneDefinition.HeadingNotSet)
+                        .Append(reference.Latitude)
+                        .Append(reference.Longitude)
+                        .Append(reference.Altitude)
+                        .Append(referencePoint2.Latitude)
+                        .Append(referencePoint2.Longitude)
+                        .Append(referencePoint2.Altitude)
+                        .Append(vehicleContactPoints)
+                        .Append(notUsed);
+                }
+            }
+
+            return @this;
+        }
+
+        
+        internal static BinaryWriter AppendLineReferencePoints(this BinaryWriter @this, List<Geodetics.LocalTangentPlane> lineReferencePoints, ushort versionToSaveAs)
+        {
+            if (lineReferencePoints?.Count > 0)
+            {
+                while (lineReferencePoints.Count < 4)
+                {
+                    lineReferencePoints.Add(new Geodetics.LocalTangentPlane(LaneDefinition.PointNotSet, LaneDefinition.PointNotSet, LaneDefinition.PointNotSet));
+                }
+
+                if (versionToSaveAs == 0)
+                {
+                    @this
+                        .Append((UInt32)VBoxConfigurationFiles.VbcStructureType.CornerInfo)
+                        .AppendStringWithLength("Line reference points")
+                        // write out the payload length - 4 * cornerInfo_t
+                        .Append((UInt16)(4 * 12))
+                        .Append(lineReferencePoints, false);
+                }
+                else
+                {
+                    @this
+                        .Append((UInt32)VBoxConfigurationFiles.VbcStructureType.CornerInfo)
+                        .AppendStringWithLength("Line reference points")
+                        // write out the payload length - 4 * cornerInfo_t
+                        .Append((UInt32)(4 * 12))
+                        .Append(lineReferencePoints, false);
+                }
+            }
+
+            return @this;
+        }
+    }		
