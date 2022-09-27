@@ -29,7 +29,6 @@ antenna_dir = {
 
 backlight.set(5000)
 
-
 class GV:
     x_scale = ["6m"]
     y_scale = ["6m"]
@@ -43,7 +42,7 @@ class GV:
     set_button = "Antenna A"
     cp_number = ["0"]
     a_set = False
-    cp_x_y = []
+    cp_x_y_list = []
 
 class ball_position:
     def __init__(self):
@@ -69,6 +68,7 @@ class ball_position:
 class Point():
 
     def __init__(self):
+        self.x_y_list = []
         self.stored_points_colour = [gui.DL_COLOR_RGB(0,0,0xFF)]
         self.antenna_colour = [gui.DL_COLOR_RGB(150, 0, 0)]
         self.set_points =  [
@@ -163,6 +163,9 @@ class Point():
 
     def get_gui_b(self):
         return self.antenna_b_gui
+
+    # def cp_x_y_position(self, x ,y):
+    #     self.x_y_list.append(x, y)
 
 
 def degE7_to_minE5(degE7):
@@ -324,7 +327,7 @@ def set_cp(l):
             GV.cp_list.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000))
             GV.cp_number[0] = str(len(GV.cp_list))
             point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
-            GV.cp_x_y.append([ball.ball_pos_x, ball.ball_pos_y])
+            GV.cp_x_y_list.append([sample.x_m, sample.y_m])
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) < 1:
             GV.a_set = True
@@ -345,6 +348,7 @@ def delete_last_point(l):
             point.remove_contact_point(len(GV.cp_list))
             GV.cp_list.pop(-1)
             GV.cp_number[0] = str(int(GV.cp_number[0]) - 1)
+            GV.cp_x_y_list.pop(-1)
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) == 1:
             GV.antennaAcoords.pop(-1)
