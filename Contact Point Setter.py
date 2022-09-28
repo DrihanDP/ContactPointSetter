@@ -45,6 +45,7 @@ class GV:
     cp_x_y_list = []
 
 class ball_position:
+
     def __init__(self):
         self.mid_lat = 0
         self.mid_long = 0
@@ -239,6 +240,7 @@ def reset_cp(l):
     GV.cp_list = []
     GV.antennaAcoords = []
     GV.antennaBcoords = []
+    GV.cp_x_y_list = []
 
 
 def get_picture_button(name):
