@@ -165,10 +165,6 @@ class Point():
     def get_gui_b(self):
         return self.antenna_b_gui
 
-    # def cp_x_y_position(self, x ,y):
-    #     self.x_y_list.append(x, y)
-
-
 def degE7_to_minE5(degE7):
         return int((float(degE7) * 0.6) + (0.5 if degE7 >= 0.0 else -0.5))
 
@@ -368,31 +364,26 @@ def zoom_out(l):
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
         GV.x_scale[0] = (str(x_scale_int + 1) + "m")
         GV.y_scale[0] = (str(y_scale_int + 1) + "m")
-        # TODO use 
-        # x_pixel_per_m = 400 / int(GV.x_scale[0].replace("m", ""))
-        # y_pixel_per_m = 400 / int(GV.y_scale[0].replace("m", ""))
-        # for x in range(len(GV.cp_list)):
-        #     if float(GV.cp_x_y[0][0]) > 200:
-        #         x_offset = math.sqrt((x_pixel_per_m) * 0.70710678118654752440084436210485) * -1
-        #     else:
-        #         x_offset = math.sqrt((x_pixel_per_m) * 0.70710678118654752440084436210485)
-        #     if float(GV.cp_x_y[0][1]) > 270:
-        #         y_offset = math.sqrt((y_pixel_per_m) * 0.70710678118654752440084436210485) * -1
-        #     else:
-        #         y_offset = math.sqrt((y_pixel_per_m) * 0.70710678118654752440084436210485)
-        #     # TODO need to make sure the new co-ordinates are swapped out and then used
-        #     point.set_points[x][0] = gui.DL_VERTEX2F((float(GV.cp_x_y[0][0]) + x_offset), (float(GV.cp_x_y[0][1]) + y_offset))
+
     else:
         pass
 
 
 def zoom_in(l):
     # TODO zoom in and out for all of the contact points
+    x = 0
     if int(GV.x_scale[0].replace("m", "")) > 1:
         x_scale_int = int(GV.x_scale[0].replace("m", ""))
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
         GV.x_scale[0] = (str(x_scale_int - 1) + "m")
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
+        while x < len(GV.cp_x_y_list):
+            new_x_coord = 370 / int(GV.x_scale[0].replace("m", "")) * (GV.cp_x_y_list[x][0] - 0.63)
+            new_y_coord = 350 / int(GV.y_scale[0].replace("m", "")) * (GV.cp_x_y_list[x][1] - 0.2)
+            point.set_contact_point(x, new_x_coord, new_y_coord)
+            GV.cp_x_y_list[0] = new_x_coord
+            GV.cp_x_y_list[1] = new_y_coord
+            x += 1 
     else:
         pass
 
