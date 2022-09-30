@@ -378,17 +378,21 @@ def zoom_in(l):
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
         for x in range(len(GV.cp_x_y_list)):
             # TODO fix this 
-            new_x_coord = float(GV.cp_x_y_list[x][0]) + (370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.cp_x_y_list[x][0]) - 0.63)))
-            new_y_coord = float(GV.cp_x_y_list[x][1]) - (350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.cp_x_y_list[x][1]) - 0.2)))
+            new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.cp_x_y_list[x][0]) - 0.63))
+            new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.cp_x_y_list[x][1]) - 0.2))
             print(new_x_coord, new_y_coord)
-            point.set_contact_point(x, new_x_coord, new_y_coord)
-            GV.cp_x_y_list[x][0] = str(new_x_coord)
-            GV.cp_x_y_list[x][1] = str(new_y_coord)
+            point.set_contact_point(x, 200 - new_x_coord, 270 - new_y_coord)
+            # GV.cp_x_y_list[x][0] = str(new_x_coord)
+            # GV.cp_x_y_list[x][1] = str(new_y_coord)
     else:
         pass
 
 
 def save(l):
+    pass
+
+
+def upload_points():
     pass
 
 
@@ -448,27 +452,30 @@ def main_screen():
         [gui.CTRL_TEXT, 322, 65, 28, gui.OPT_CENTERX, GV.x_scale],
         [gui.CTRL_TEXT, 375, 65, 28, gui.OPT_CENTERX, GV.y_scale],
         [gui.CTRL_TEXT, 350, 65, 28, gui.OPT_CENTERX, "x"],
-        [gui.CTRL_TEXT, 450, 70, 30, 0, 'Latitude:'],
-        [gui.CTRL_TEXT, 650, 70, 30, 0, GV.lat],
-        [gui.CTRL_TEXT, 450, 110, 30, 0, 'Longitude:'],
-        [gui.CTRL_TEXT, 650, 110, 30, 0, GV.long],
-        [gui.CTRL_TEXT, 450, 150, 30, 0, "Points set:"],
-        [gui.CTRL_TEXT, 650, 150, 30, 0, GV.cp_number],
+        [gui.CTRL_TEXT, 0, 440, 27, 0, 'Latitude:'],
+        [gui.CTRL_TEXT, 100, 440, 27, 0, GV.lat],
+        [gui.CTRL_TEXT, 0, 460, 27, 0, 'Longitude:'],
+        [gui.CTRL_TEXT, 100, 460, 27, 0, GV.long],
+        [gui.CTRL_TEXT, 450, 60, 30, 0, "Points set:"],
+        [gui.CTRL_TEXT, 650, 60, 30, 0, GV.cp_number],
         [gui.CTRL_TEXT, 650, 360, 30, 0, 'Set point'],
         [gui.CTRL_TEXT, 494, 360, 30, 0, 'Zoom'],
         [gui.CTRL_TEXT, 670, 260, 30, 0, 'To set'],
         [gui.CTRL_TEXT, 450, 260, 30, 0, 'Delete Last'],
+        [gui.CTRL_TEXT, 450, 160, 30, 0, 'Save to SD'],
+        [gui.CTRL_TEXT, 615, 160, 30, 0, 'Serial upload'],
     ])
     gui_list.extend(button_options())
     gui_list.extend([
         [gui.DL_COLOR_RGB(255, 255, 255)],
         antenna_or_cp_button(),
-        [gui.CTRL_FLATBUTTON, 630, 200, 160, 60, 30, 'Coldstart', coldstart_cb],
+        [gui.CTRL_FLATBUTTON, 450, 100, 160, 60, 30, 'Coldstart', coldstart_cb],
         [gui.CTRL_FLATBUTTON, 630, 400, 160, 60, 30, 'Set', set_cp],
         [gui.CTRL_FLATBUTTON, 535, 400, 75, 60, 30, '+', zoom_in],
         [gui.CTRL_FLATBUTTON, 450, 400, 75, 60, 30, '-', zoom_out],
         [gui.CTRL_FLATBUTTON, 450, 300, 160, 60, 30, 'Del Last', delete_last_point],
         [gui.CTRL_FLATBUTTON, 450, 200, 160, 60, 30, 'Save', save],
+        [gui.CTRL_FLATBUTTON, 630, 200, 160, 60, 30, 'Upload', upload_points],
     ])
     gui.show(gui_list)
 
