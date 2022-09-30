@@ -43,6 +43,7 @@ class GV:
     cp_number = ["0"]
     a_set = False
     cp_x_y_list = []
+    point_count = 0
 
 class ball_position:
 
@@ -325,7 +326,7 @@ def set_cp(l):
             GV.cp_list.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000))
             GV.cp_number[0] = str(len(GV.cp_list))
             point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
-            GV.cp_x_y_list.append([sample.x_m, sample.y_m])
+            GV.cp_x_y_list.append([str(sample.x_m), str(sample.y_m)])
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) < 1:
             GV.a_set = True
@@ -364,26 +365,25 @@ def zoom_out(l):
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
         GV.x_scale[0] = (str(x_scale_int + 1) + "m")
         GV.y_scale[0] = (str(y_scale_int + 1) + "m")
-
     else:
         pass
 
 
 def zoom_in(l):
     # TODO zoom in and out for all of the contact points
-    x = 0
     if int(GV.x_scale[0].replace("m", "")) > 1:
         x_scale_int = int(GV.x_scale[0].replace("m", ""))
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
         GV.x_scale[0] = (str(x_scale_int - 1) + "m")
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
-        while x < len(GV.cp_x_y_list):
-            new_x_coord = 370 / int(GV.x_scale[0].replace("m", "")) * (GV.cp_x_y_list[x][0] - 0.63)
-            new_y_coord = 350 / int(GV.y_scale[0].replace("m", "")) * (GV.cp_x_y_list[x][1] - 0.2)
+        for x in range(len(GV.cp_x_y_list)):
+            # TODO fix this 
+            new_x_coord = float(GV.cp_x_y_list[x][0]) + (370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.cp_x_y_list[x][0]) - 0.63)))
+            new_y_coord = float(GV.cp_x_y_list[x][1]) - (350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.cp_x_y_list[x][1]) - 0.2)))
+            print(new_x_coord, new_y_coord)
             point.set_contact_point(x, new_x_coord, new_y_coord)
-            GV.cp_x_y_list[0] = new_x_coord
-            GV.cp_x_y_list[1] = new_y_coord
-            x += 1 
+            GV.cp_x_y_list[x][0] = str(new_x_coord)
+            GV.cp_x_y_list[x][1] = str(new_y_coord)
     else:
         pass
 
