@@ -381,6 +381,8 @@ def zoom_out(l):
         GV.x_scale[0] = (str(x_scale_int + 1) + "m")
         GV.y_scale[0] = (str(y_scale_int + 1) + "m")
     else:
+
+        
         pass
 
 
@@ -395,7 +397,7 @@ def zoom_in(l):
             # TODO fix this
             new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(Point_position.point_list[x][2]) - 0.63))
             new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(Point_position.point_list[x][3]) - 0.2))
-            point.set_contact_point(x, Point_position.point_list[x][4] + new_x_coord, Point_position.point_list[x][5] + new_y_coord)
+            point.set_contact_point(x, float(Point_position.point_list[x][4]) + new_x_coord, float(Point_position.point_list[x][5]) + new_y_coord)
     else:
         pass
 
