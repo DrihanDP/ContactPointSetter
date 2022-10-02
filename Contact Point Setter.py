@@ -42,7 +42,6 @@ class GV:
     set_button = "Antenna A"
     cp_number = ["0"]
     a_set = False
-    cp_x_y_list = []
     point_count = 0
 
 class ball_position:
@@ -67,7 +66,7 @@ class ball_position:
         self.ball_pos_y = ball_pos_y
 
 
-class Point():
+class Point:
 
     def __init__(self):
         self.x_y_list = []
@@ -166,6 +165,24 @@ class Point():
     def get_gui_b(self):
         return self.antenna_b_gui
 
+
+class Point_position:
+    def __init__(self):
+        self.point_list = []
+        self.point_lat = self.point_lat
+        self.point_long = self.point_long
+        self.point_x_m = self.point_x_m
+        self.point_x_y = self.point_x_y
+        self.point_pixel_x = self.point_pixel_x
+        self.point_pixel_y = self.point_pixel_y
+
+    def get_point_position(self, point_lat, point_long, point_x_m, point_x_y, point_pixel_x, point_pixel_y):
+        self.point_list.append([point_lat, point_long, point_x_m, point_x_y, point_pixel_x, point_pixel_y])
+    
+    def delete_poition(self):
+        self.point_list.pop(-1)
+
+
 def degE7_to_minE5(degE7):
         return int((float(degE7) * 0.6) + (0.5 if degE7 >= 0.0 else -0.5))
 
@@ -237,7 +254,6 @@ def reset_cp(l):
     GV.cp_list = []
     GV.antennaAcoords = []
     GV.antennaBcoords = []
-    GV.cp_x_y_list = []
 
 
 def get_picture_button(name):
@@ -326,7 +342,7 @@ def set_cp(l):
             GV.cp_list.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000))
             GV.cp_number[0] = str(len(GV.cp_list))
             point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
-            GV.cp_x_y_list.append([str(sample.x_m), str(sample.y_m)])
+            Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, x_dist, y_dist)
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) < 1:
             GV.a_set = True
@@ -347,7 +363,7 @@ def delete_last_point(l):
             point.remove_contact_point(len(GV.cp_list))
             GV.cp_list.pop(-1)
             GV.cp_number[0] = str(int(GV.cp_number[0]) - 1)
-            GV.cp_x_y_list.pop(-1)
+            Point_position.delete_position()
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) == 1:
             GV.antennaAcoords.pop(-1)
@@ -376,14 +392,11 @@ def zoom_in(l):
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
         GV.x_scale[0] = (str(x_scale_int - 1) + "m")
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
-        for x in range(len(GV.cp_x_y_list)):
-            # TODO fix this 
-            new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.cp_x_y_list[x][0]) - 0.63))
-            new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.cp_x_y_list[x][1]) - 0.2))
-            print(new_x_coord, new_y_coord)
+        for x in range(len(Point_position.point_list)):
+            # TODO fix this
+            new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(Point_position.point_list[x][2]) - 0.63))
+            new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(Point_position.point_list[x][3]) - 0.2))
             point.set_contact_point(x, 200 - new_x_coord, 270 - new_y_coord)
-            # GV.cp_x_y_list[x][0] = str(new_x_coord)
-            # GV.cp_x_y_list[x][1] = str(new_y_coord)
     else:
         pass
 
