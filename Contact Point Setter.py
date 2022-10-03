@@ -21,10 +21,22 @@ antennaA = const(0)
 antennaB = const(1)
 points = const(2)
 
+Subject = const(0)
+Target1 = const(1)
+Target2 = const(2)
+Target3 = const(3)
+
 antenna_dir = {
     antennaA: ("Antenna A", 1),
     antennaB: ("Antenna B", 2),
     points: ("Points", 3),
+}
+
+vehicle_option_dir = {
+    Subject: ("Subject", 1),
+    Target1: ("Target 1", 2),
+    Target2: ("Target 2", 3),
+    Target3: ("Target 3", 3),
 }
 
 backlight.set(5000)
@@ -43,6 +55,7 @@ class GV:
     cp_number = ["0"]
     a_set = False
     point_list = []
+    vehicle_option_str = "Subject"
 
 class ball_position:
 
@@ -219,6 +232,17 @@ def set_cp_number(btn):
     GV.cp_number = btn.current
 
 
+def vehicle_option(btn):
+    if btn.current == "Subject":
+        GV.vehicle_option_str = "Subject"
+    elif btn.current == "Target 1":
+        GV.vehicle_option_str = "Target 1"
+    elif btn.current == "Target 2":
+        GV.vehicle_option_str = "Target 2"
+    elif btn.current == "Target 3":
+        GV.vehicle_option_str = "Target 3"
+
+
 def set_antenna_or_cp(btn):
     if btn.current == "Points":
         GV.set_button = "Points"
@@ -376,12 +400,11 @@ def delete_last_point(l):
 
 # TODO fix properly
 def zoom_out(l):
-    pass
-    # if int(GV.x_scale[0].replace("m", "")) < 15:
-    #     x_scale_int = int(GV.x_scale[0].replace("m", ""))
-    #     y_scale_int = int(GV.y_scale[0].replace("m", ""))
-    #     GV.x_scale[0] = (str(x_scale_int + 1) + "m")
-    #     GV.y_scale[0] = (str(y_scale_int + 1) + "m")
+    if int(GV.x_scale[0].replace("m", "")) < 15:
+        x_scale_int = int(GV.x_scale[0].replace("m", ""))
+        y_scale_int = int(GV.y_scale[0].replace("m", ""))
+        GV.x_scale[0] = (str(x_scale_int + 1) + "m")
+        GV.y_scale[0] = (str(y_scale_int + 1) + "m")
     #     for x in range(len(GV.point_list)):
     #         new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2]) - 0.63))
     #         new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3]) - 0.2))
@@ -393,12 +416,11 @@ def zoom_out(l):
 
 
 def zoom_in(l):
-    pass
-    # if int(GV.x_scale[0].replace("m", "")) > 1:
-    #     x_scale_int = int(GV.x_scale[0].replace("m", ""))
-    #     y_scale_int = int(GV.y_scale[0].replace("m", ""))
-    #     GV.x_scale[0] = (str(x_scale_int - 1) + "m")
-    #     GV.y_scale[0] = (str(y_scale_int - 1) + "m")
+    if int(GV.x_scale[0].replace("m", "")) > 1:
+        x_scale_int = int(GV.x_scale[0].replace("m", ""))
+        y_scale_int = int(GV.y_scale[0].replace("m", ""))
+        GV.x_scale[0] = (str(x_scale_int - 1) + "m")
+        GV.y_scale[0] = (str(y_scale_int - 1) + "m")
     #     for x in range(len(GV.point_list)):
     #         new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2]) - 0.63))
     #         new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3]) - 0.2))
@@ -409,8 +431,19 @@ def zoom_in(l):
     #     pass
 
 def save(l):
-    pass
-
+    if vts.sd_present() == True:
+        if GV.vehicle_option_str == "Subject":
+            file_name = "Subject.VBC"
+        elif GV.vehicle_option_str == "Target 1":
+            file_name = "Target_1.VBC"
+        elif GV.vehicle_option_str == "Target 2":
+            file_name = "Target_2.VBC"
+        elif GV.vehicle_option_str == "Target 3":
+            file_name = "Target_3.VBC"
+        f = open(file_name, 'w')
+        f.write("RLVB3iCFG")
+        f.write("0xAA55")
+        f.close()
 
 def upload_points():
     pass
@@ -489,6 +522,7 @@ def main_screen():
     gui_list.extend([
         [gui.DL_COLOR_RGB(255, 255, 255)],
         antenna_or_cp_button(),
+        subject_or_target(),
         [gui.CTRL_FLATBUTTON, 450, 100, 160, 60, 30, 'Coldstart', coldstart_cb],
         [gui.CTRL_FLATBUTTON, 630, 400, 160, 60, 30, 'Set', set_cp],
         [gui.CTRL_FLATBUTTON, 535, 400, 75, 60, 30, '+', zoom_in],
@@ -501,8 +535,9 @@ def main_screen():
 
 
 def main():
-    global bank, antenna_or_cp_button, ball, point
+    global bank, antenna_or_cp_button, ball, point, subject_or_target
     antenna_or_cp_button = LoopingButton(630, 300, 160, 60, [x[0] for x in antenna_dir.values()], 30, set_antenna_or_cp)
+    subject_or_target = LoopingButton(630, 100, 160, 60, [x[0] for x in vehicle_option_dir.values()], 30, vehicle_option)
     ball = ball_position()
     point = Point()
     bank = Image_Bank((
