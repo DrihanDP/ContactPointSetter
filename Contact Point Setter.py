@@ -42,6 +42,7 @@ class GV:
     set_button = "Antenna A"
     cp_number = ["0"]
     a_set = False
+    point_list = []
 
 class ball_position:
 
@@ -167,7 +168,6 @@ class Point:
 
 class Point_position:
     def __init__(self):
-        self.point_list = []
         self.point_lat = self.point_lat
         self.point_long = self.point_long
         self.point_x_m = self.point_x_m
@@ -175,11 +175,11 @@ class Point_position:
         self.point_pixel_x = self.point_pixel_x
         self.point_pixel_y = self.point_pixel_y
 
-    def get_point_position(self, point_lat, point_long, point_x_m, point_x_y, point_pixel_x, point_pixel_y):
-        self.point_list.append([point_lat, point_long, point_x_m, point_x_y, point_pixel_x, point_pixel_y])
+    def get_point_position(point_lat, point_long, point_x_m, point_x_y, point_pixel_x, point_pixel_y):
+        GV.point_list.append([point_lat, point_long, point_x_m, point_x_y, point_pixel_x, point_pixel_y])
     
-    def delete_poition(self):
-        self.point_list.pop(-1)
+    def delete_position(self):
+        GV.point_list.pop(-1)
 
 
 def degE7_to_minE5(degE7):
@@ -374,33 +374,39 @@ def delete_last_point(l):
 
 #If y is positive +, if y is negative - 
 
+# TODO fix properly
 def zoom_out(l):
-    if int(GV.x_scale[0].replace("m", "")) < 15:
-        x_scale_int = int(GV.x_scale[0].replace("m", ""))
-        y_scale_int = int(GV.y_scale[0].replace("m", ""))
-        GV.x_scale[0] = (str(x_scale_int + 1) + "m")
-        GV.y_scale[0] = (str(y_scale_int + 1) + "m")
-    else:
-
-        
-        pass
+    pass
+    # if int(GV.x_scale[0].replace("m", "")) < 15:
+    #     x_scale_int = int(GV.x_scale[0].replace("m", ""))
+    #     y_scale_int = int(GV.y_scale[0].replace("m", ""))
+    #     GV.x_scale[0] = (str(x_scale_int + 1) + "m")
+    #     GV.y_scale[0] = (str(y_scale_int + 1) + "m")
+    #     for x in range(len(GV.point_list)):
+    #         new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2]) - 0.63))
+    #         new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3]) - 0.2))
+    #         point.set_contact_point(x + 1, float(GV.point_list[x][4]) - new_x_coord, float(GV.point_list[x][5]) - new_y_coord)
+    #         GV.point_list[x][4] = float(GV.point_list[x][4]) - new_x_coord
+    #         GV.point_list[x][5] = float(GV.point_list[x][5]) - new_y_coord
+    # else:
+    #     pass
 
 
 def zoom_in(l):
-    # TODO zoom in and out for all of the contact points
-    if int(GV.x_scale[0].replace("m", "")) > 1:
-        x_scale_int = int(GV.x_scale[0].replace("m", ""))
-        y_scale_int = int(GV.y_scale[0].replace("m", ""))
-        GV.x_scale[0] = (str(x_scale_int - 1) + "m")
-        GV.y_scale[0] = (str(y_scale_int - 1) + "m")
-        for x in range(len(Point_position.point_list)):
-            # TODO fix this
-            new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(Point_position.point_list[x][2]) - 0.63))
-            new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(Point_position.point_list[x][3]) - 0.2))
-            point.set_contact_point(x, float(Point_position.point_list[x][4]) + new_x_coord, float(Point_position.point_list[x][5]) + new_y_coord)
-    else:
-        pass
-
+    pass
+    # if int(GV.x_scale[0].replace("m", "")) > 1:
+    #     x_scale_int = int(GV.x_scale[0].replace("m", ""))
+    #     y_scale_int = int(GV.y_scale[0].replace("m", ""))
+    #     GV.x_scale[0] = (str(x_scale_int - 1) + "m")
+    #     GV.y_scale[0] = (str(y_scale_int - 1) + "m")
+    #     for x in range(len(GV.point_list)):
+    #         new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2]) - 0.63))
+    #         new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3]) - 0.2))
+    #         point.set_contact_point(x + 1, float(GV.point_list[x][4]) + new_x_coord, float(GV.point_list[x][5]) + new_y_coord)
+    #         GV.point_list[x][4] = float(GV.point_list[x][4]) + new_x_coord
+    #         GV.point_list[x][5] = float(GV.point_list[x][5]) + new_y_coord
+    # else:
+    #     pass
 
 def save(l):
     pass
