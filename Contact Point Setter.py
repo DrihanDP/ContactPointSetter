@@ -442,7 +442,7 @@ def save(l):
             file_name = "Target_3.VBC"
         f = open(file_name, 'w')
         f.write("RLVB3iCFG")
-        f.write("0xAA55")
+        f.write(bin(0xAA55))
         f.close()
 
 def upload_points():
