@@ -428,8 +428,8 @@ def zoom_in(l):
             print(new_x_coord)
             print(new_y_coord)
             point.set_contact_point(x + 1, new_x_coord, new_y_coord)
-            GV.point_list[x][4] = float(GV.point_list[x][4]) + new_x_coord
-            GV.point_list[x][5] = float(GV.point_list[x][5]) + new_y_coord
+            GV.point_list[x][4] = new_x_coord
+            GV.point_list[x][5] = new_y_coord
             print(GV.point_list)
     else:
         pass
