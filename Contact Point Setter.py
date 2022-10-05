@@ -207,7 +207,7 @@ def position_calc():
         # TODO need to divide x/y_scale by 2? 
         x_dist = 370 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m - 0.63)
         y_dist = 350 / int(GV.y_scale[0].replace("m", "")) * (sample.y_m - 0.2)
-        ball.update_vals(200 + x_dist, 270 + y_dist)
+        ball.update_vals(200 + x_dist, 240 + y_dist)
         ball.update()
 
 
@@ -222,7 +222,7 @@ def gnss_callback():
         if sample.fix_type > 1: #TODO change to rtk fix
             if ball.mid_lat == 0 and ball.mid_long == 0:
                 ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
-                ball.update_vals(200, 270)
+                ball.update_vals(200, 240)
                 ball.update()
             else:
                 position_calc()
@@ -421,14 +421,19 @@ def zoom_in(l):
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
         GV.x_scale[0] = (str(x_scale_int - 1) + "m")
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
-    #     for x in range(len(GV.point_list)):
-    #         new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2]) - 0.63))
-    #         new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3]) - 0.2))
-    #         point.set_contact_point(x + 1, float(GV.point_list[x][4]) + new_x_coord, float(GV.point_list[x][5]) + new_y_coord)
-    #         GV.point_list[x][4] = float(GV.point_list[x][4]) + new_x_coord
-    #         GV.point_list[x][5] = float(GV.point_list[x][5]) + new_y_coord
-    # else:
-    #     pass
+        for x in range(len(GV.point_list)):
+            print(GV.point_list)
+            new_x_coord = (370 / float(GV.point_list[x][2])) / (int(GV.x_scale[0].replace("m", "")))
+            new_y_coord = (370 / float(GV.point_list[x][3]))  / (int(GV.x_scale[0].replace("m", "")))
+            print(new_x_coord)
+            print(new_y_coord)
+            point.set_contact_point(x + 1, new_x_coord, new_y_coord)
+            GV.point_list[x][4] = float(GV.point_list[x][4]) + new_x_coord
+            GV.point_list[x][5] = float(GV.point_list[x][5]) + new_y_coord
+            print(GV.point_list)
+    else:
+        pass
+
 
 def save(l):
     if vts.sd_present() == True:
@@ -444,6 +449,7 @@ def save(l):
         f.write("RLVB3iCFG")
         f.write(bin(0xAA55))
         f.close()
+
 
 def upload_points():
     pass
