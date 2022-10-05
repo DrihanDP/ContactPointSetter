@@ -204,7 +204,6 @@ def position_calc():
     if GV.a_set == False:
         pass
     else:
-        # TODO need to divide x/y_scale by 2? 
         x_dist = 370 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m - 0.63)
         y_dist = 350 / int(GV.y_scale[0].replace("m", "")) * (sample.y_m - 0.2)
         ball.update_vals(200 + x_dist, 240 + y_dist)
@@ -413,7 +412,7 @@ def zoom_out(l):
     #         GV.point_list[x][5] = float(GV.point_list[x][5]) - new_y_coord
     # else:
     #     pass
-
+# x_dist = 370 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m - 0.63)
 
 def zoom_in(l):
     if int(GV.x_scale[0].replace("m", "")) > 1:
@@ -423,13 +422,15 @@ def zoom_in(l):
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
         for x in range(len(GV.point_list)):
             print(GV.point_list)
-            new_x_coord = (370 / float(GV.point_list[x][2])) / (int(GV.x_scale[0].replace("m", "")))
-            new_y_coord = (370 / float(GV.point_list[x][3]))  / (int(GV.x_scale[0].replace("m", "")))
-            print(new_x_coord)
-            print(new_y_coord)
-            point.set_contact_point(x + 1, new_x_coord, new_y_coord)
-            GV.point_list[x][4] = new_x_coord
-            GV.point_list[x][5] = new_y_coord
+            pixel_change_x = float(GV.point_list[x][4]) / int(GV.x_scale[0].replace("m", "")) * 0.70710678118654752440084436210485
+            pixel_change_y = float(GV.point_list[x][5]) / int(GV.y_scale[0].replace("m", "")) * 0.70710678118654752440084436210485
+            print(pixel_change_x)
+            print(pixel_change_y)
+            # new_x_coord = 370 / (int(GV.x_scale[0].replace("m", ""))) * float(GV.point_list[x][2])
+            # new_y_coord = 370 / (int(GV.y_scale[0].replace("m", ""))) * float(GV.point_list[x][3])
+            point.set_contact_point(x + 1, float(GV.point_list[x][4]) + pixel_change_x, float(GV.point_list[x][5]) + pixel_change_y)
+            GV.point_list[x][4] = float(GV.point_list[x][4]) + pixel_change_x
+            GV.point_list[x][5] = float(GV.point_list[x][5]) + pixel_change_y
             print(GV.point_list)
     else:
         pass
