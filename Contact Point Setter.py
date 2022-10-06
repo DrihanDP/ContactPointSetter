@@ -204,9 +204,9 @@ def position_calc():
     if GV.a_set == False:
         pass
     else:
-        x_dist = 370 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m - 0.63)
-        y_dist = 350 / int(GV.y_scale[0].replace("m", "")) * (sample.y_m - 0.2)
-        ball.update_vals(200 + x_dist, 240 + y_dist)
+        x_dist = 400 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m - 0.63)
+        y_dist = 420 / int(GV.y_scale[0].replace("m", "")) * (sample.y_m - 0.2)
+        ball.update_vals(200 + x_dist, 270 + y_dist)
         ball.update()
 
 
@@ -221,7 +221,7 @@ def gnss_callback():
         if sample.fix_type > 1: #TODO change to rtk fix
             if ball.mid_lat == 0 and ball.mid_long == 0:
                 ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
-                ball.update_vals(200, 240)
+                ball.update_vals(200, 270)
                 ball.update()
             else:
                 position_calc()
@@ -395,8 +395,6 @@ def delete_last_point(l):
             GV.antennaBcoords.pop(-1)
             point.delete_antenna_b()
 
-#If y is positive +, if y is negative - 
-
 # TODO fix properly
 def zoom_out(l):
     if int(GV.x_scale[0].replace("m", "")) < 15:
@@ -404,15 +402,19 @@ def zoom_out(l):
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
         GV.x_scale[0] = (str(x_scale_int + 1) + "m")
         GV.y_scale[0] = (str(y_scale_int + 1) + "m")
-    #     for x in range(len(GV.point_list)):
-    #         new_x_coord = 370 / (int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2]) - 0.63))
-    #         new_y_coord = 350 / (int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3]) - 0.2))
-    #         point.set_contact_point(x + 1, float(GV.point_list[x][4]) - new_x_coord, float(GV.point_list[x][5]) - new_y_coord)
-    #         GV.point_list[x][4] = float(GV.point_list[x][4]) - new_x_coord
-    #         GV.point_list[x][5] = float(GV.point_list[x][5]) - new_y_coord
-    # else:
-    #     pass
-# x_dist = 370 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m - 0.63)
+        for x in range(len(GV.point_list)):
+            pixel_change_x = 400 / int(GV.x_scale[0].replace("m", "")) * 0.5 * 0.70710678118654752440084436210485
+            pixel_change_y = 420 / int(GV.y_scale[0].replace("m", "")) * 0.5 * 0.70710678118654752440084436210485
+            if GV.point_list[x][4] < 200:
+                pixel_change_x = pixel_change_x * -1
+            if GV.point_list[x][5] < 270:
+                pixel_change_y = pixel_change_y * -1
+            point.set_contact_point(x + 1, float(GV.point_list[x][4]) - pixel_change_x, float(GV.point_list[x][5]) - pixel_change_y)
+            GV.point_list[x][4] = float(GV.point_list[x][4]) - pixel_change_x
+            GV.point_list[x][5] = float(GV.point_list[x][5]) - pixel_change_y
+    else:
+        pass
+
 
 def zoom_in(l):
     if int(GV.x_scale[0].replace("m", "")) > 1:
@@ -421,17 +423,15 @@ def zoom_in(l):
         GV.x_scale[0] = (str(x_scale_int - 1) + "m")
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
         for x in range(len(GV.point_list)):
-            print(GV.point_list)
-            pixel_change_x = float(GV.point_list[x][4]) / int(GV.x_scale[0].replace("m", "")) * 0.70710678118654752440084436210485
-            pixel_change_y = float(GV.point_list[x][5]) / int(GV.y_scale[0].replace("m", "")) * 0.70710678118654752440084436210485
-            print(pixel_change_x)
-            print(pixel_change_y)
-            # new_x_coord = 370 / (int(GV.x_scale[0].replace("m", ""))) * float(GV.point_list[x][2])
-            # new_y_coord = 370 / (int(GV.y_scale[0].replace("m", ""))) * float(GV.point_list[x][3])
+            pixel_change_x = 400 / int(GV.x_scale[0].replace("m", "")) * 0.5 * 0.70710678118654752440084436210485
+            pixel_change_y = 420 / int(GV.y_scale[0].replace("m", "")) * 0.5 * 0.70710678118654752440084436210485
+            if GV.point_list[x][4] < 200:
+                pixel_change_x = pixel_change_x * -1
+            if GV.point_list[x][5] < 270:
+                pixel_change_y = pixel_change_y * -1
             point.set_contact_point(x + 1, float(GV.point_list[x][4]) + pixel_change_x, float(GV.point_list[x][5]) + pixel_change_y)
             GV.point_list[x][4] = float(GV.point_list[x][4]) + pixel_change_x
             GV.point_list[x][5] = float(GV.point_list[x][5]) + pixel_change_y
-            print(GV.point_list)
     else:
         pass
 
