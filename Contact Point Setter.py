@@ -403,8 +403,8 @@ def zoom_out(l):
         GV.x_scale[0] = (str(x_scale_int + 1) + "m")
         GV.y_scale[0] = (str(y_scale_int + 1) + "m")
         for x in range(len(GV.point_list)):
-            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * float(GV.point_list[x][2])) + 200
-            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * float(GV.point_list[x][3])) + 270
+            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2])) - 0.63)+ 200
+            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3])) - 0.2)+ 270
             point.set_contact_point(x + 1, pixel_change_x, pixel_change_y)
             GV.point_list[x][4] = pixel_change_x
             GV.point_list[x][5] = pixel_change_y
@@ -419,8 +419,8 @@ def zoom_in(l):
         GV.x_scale[0] = (str(x_scale_int - 1) + "m")
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
         for x in range(len(GV.point_list)):
-            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * float(GV.point_list[x][2])) + 200
-            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * float(GV.point_list[x][3])) + 270
+            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2])) - 0.63) + 200
+            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3])) - 0.2)+ 270
             point.set_contact_point(x + 1, pixel_change_x, pixel_change_y)
             GV.point_list[x][4] = pixel_change_x
             GV.point_list[x][5] = pixel_change_y
