@@ -204,8 +204,8 @@ def position_calc():
     if GV.a_set == False:
         pass
     else:
-        x_dist = 400 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m - 0.63)
-        y_dist = 420 / int(GV.y_scale[0].replace("m", "")) * (sample.y_m - 0.2)
+        x_dist = 400 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m)
+        y_dist = 420 / int(GV.y_scale[0].replace("m", "")) * (sample.y_m)
         ball.update_vals(200 + x_dist, 270 + y_dist)
         ball.update()
 
@@ -368,10 +368,8 @@ def set_cp(l):
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) < 1:
             GV.a_set = True
-            lat_base = degE7_to_minE5(sample.lat_degE7)
-            long_base = degE7_to_minE5(sample.lng_degE7)
             GV.antennaAcoords.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000))
-            vbox.set_basepoint(lat_base, long_base)
+            vbox.set_basepoint()
             point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
     elif GV.set_button == "Antenna B":
         if len(GV.antennaBcoords) < 1:
