@@ -1,0 +1,52 @@
+Write Header:
+- RLVB3iCFG
+- 0x55AA
+- 0x0000
+- Struct Type (bit field, 32 bit) (us.pack('>I', file_struct))
+
+Then Write:
+- Type (STruct type from above, i.e subject, TG 1, etc) as a 32bit int
+- String Length (22) (us.pack('>H', 22))
+- Write Size of dat (1080) (us.pack('>H', 1080))
+- Write Lane Type ( 0xCCCCCCCC) (us.pack('>I', 0xCCCCCCCC))
+- Write Number of points stored (NPoints = number of points added by user in app) (us.pack('>I', NPoints))
+
+Write Reference Point:
+- Write Antenna A Latitude (RAD) (us.pack('>d', antA_lat))
+- Write Antenna A Longitude (RAD) (us.pack('>d', antA_lon))
+- Write Antenna A Altitide (Metres?) (us.pack('>d', antA_alt))
+
+Write ContactPointSettings:
+- Write Empty X  - (us.pack('>f', -6500000.00))
+- Write Empty Y  - (us.pack('>f', -6500000.00))
+- Write Empty Z  - (us.pack('>f', -6500000.00))
+- Write Empty heading  - (us.pack('>f', -1.0))
+- Write Empty X  - (us.pack('>f', -6500000.00))
+- Write Empty Y  - (us.pack('>f', -6500000.00))
+- Write Empty Z  - (us.pack('>f', -6500000.00))
+- Write Empty heading  - (us.pack('>f', -1.0))
+- Write Antenna A Latitude (RAD) (us.pack('>d', antA_lat))
+- Write Antenna A Longitude (RAD) (us.pack('>d', antA_lon))
+- Write Antenna A Altitide (Metres?) (us.pack('>d', antA_alt))
+- Write Antenna B Latitude (RAD) (us.pack('>d', antB_lat))
+- Write Antenna B Longitude (RAD) (us.pack('>d', antB_lon))
+- Write Antenna B Altitide (Metres?) (us.pack('>d', antB_alt))
+
+Write Contact points:
+For all 24 points:
+If set by user:
+    - Write point Latitude (RAD) (us.pack('>d', contactPoint_lat))
+    - Write point Longitude (RAD) (us.pack('>d', contactPoint_lon))
+    - Write point Altitide (Metres?) (us.pack('>d', contactPoint_alt))
+else:
+    TODO: Check 'PointNotSet' value is -65000000 for lat, long and height(m)
+    - Write empty Latitude (RAD) (us.pack('>d',  -6500000.00))
+    - Write empty Longitude (RAD) (us.pack('>d',  -6500000.00))
+    - Write empty Altitide (Metres?) (us.pack('>d',  -6500000.00))
+
+Write Empty Tangent Points data:
+for i in range(24):
+    - Write Empty X  - (us.pack('>f', -6500000.00))
+    - Write Empty Y  - (us.pack('>f', -6500000.00))
+    - Write Empty Z  - (us.pack('>f', -6500000.00))
+    - Write Empty heading  - (us.pack('>f', -1.0))
