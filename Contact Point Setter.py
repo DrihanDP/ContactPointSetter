@@ -8,6 +8,7 @@ from micropython import const
 import backlight
 import gnss
 import vbox
+import ustruct as us
 
 
 RED = const(0xFF0000)
@@ -436,17 +437,24 @@ def zoom_in(l):
 
 def save(l):
     if vts.sd_present() == True:
+        file_struct = 0
         if GV.vehicle_option_str == "Subject":
             file_name = "Subject.VBC"
+            file_struct |= (1 << 4)
         elif GV.vehicle_option_str == "Target 1":
             file_name = "Target_1.VBC"
+            file_struct |= (1 << 5)
         elif GV.vehicle_option_str == "Target 2":
             file_name = "Target_2.VBC"
+            file_struct |= (1 << 6)
         elif GV.vehicle_option_str == "Target 3":
             file_name = "Target_3.VBC"
-        f = open(file_name, 'w')
-        f.write("RLVB3iCFG")
-        f.write(bin(0xAA55))
+            file_struct |= (1 << 8)
+        f = open(file_name, 'wb')
+        f.write(b"RLVB3iCFG")
+        f.write(us.pack('>H', 0x55AA))
+        f.write(us.pack('>H', 0))
+        f.write(us.pack('>I', file_struct))
         f.close()
 
 
