@@ -546,7 +546,7 @@ def main_screen():
         [gui.CTRL_FLATBUTTON, 630, 400, 160, 60, 30, 'Set', set_cp],
         [gui.CTRL_FLATBUTTON, 535, 400, 75, 60, 30, '+', zoom_in],
         [gui.CTRL_FLATBUTTON, 450, 400, 75, 60, 30, '-', zoom_out],
-        [gui.CTRL_FLATBUTTON, 450, 300, 160, 60, 30, 'Del Last', delete_last_point],
+        [gui.CTRL_FLATBUTTON, 450, 300, 160, 60, 30, 'Delete', delete_last_point],
         [gui.CTRL_FLATBUTTON, 450, 200, 160, 60, 30, 'Save', save],
         [gui.CTRL_FLATBUTTON, 630, 200, 160, 60, 30, 'Upload', upload_points],
     ])
