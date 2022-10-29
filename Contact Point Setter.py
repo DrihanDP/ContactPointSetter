@@ -369,14 +369,12 @@ def set_cp(l):
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) < 1:
             GV.a_set = True
-            #TODO add altidude
-            GV.antennaAcoords.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000))
+            GV.antennaAcoords.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.alt_msl_m))
             vbox.set_basepoint()
             point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
     elif GV.set_button == "Antenna B":
         if len(GV.antennaBcoords) < 1:
-            #TODO add altidude
-            GV.antennaBcoords.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000))
+            GV.antennaBcoords.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.alt_msl_m))
             point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
 
 
@@ -455,8 +453,9 @@ def save(l):
         f.write(us.pack('>H', 1080))
         f.write(us.pack('>I', 0xCCCCCCCC))
         f.write(us.pack('>I', len(GV.cp_list)))
-        for i in GV.antennaAcoords:
-            f.write(us.pack('>d', i))
+        for vals in GV.antennaAcoords:
+            for i in vals:
+                f.write(us.pack('>d', i))
         f.write(us.pack('>f', -6500000.00))
         f.write(us.pack('>f', -6500000.00))
         f.write(us.pack('>f', -6500000.00))
@@ -465,10 +464,12 @@ def save(l):
         f.write(us.pack('>f', -6500000.00))
         f.write(us.pack('>f', -6500000.00))
         f.write(us.pack('>f', -1.0))
-        for i in GV.antennaAcoords:
-            f.write(us.pack('>d', i))
-        for i in GV.antennaBcoords:
-            f.write(us.pack('>d', i))
+        for vals in GV.antennaAcoords:
+            for i in vals:
+                f.write(us.pack('>d', i))
+        for vals in GV.antennaBcoords:
+            for i in vals:
+                f.write(us.pack('>d', i))
         f.close()
 
 
