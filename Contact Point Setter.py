@@ -362,19 +362,19 @@ def set_cp(l):
     # TODO make sure that antenna A is set first
     if GV.set_button == "Points":
         if len(GV.cp_list) < 24:
-            GV.cp_list.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.alt_msl_m))
+            GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
             GV.cp_number[0] = str(len(GV.cp_list))
             point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
             Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y)
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) < 1:
             GV.a_set = True
-            GV.antennaAcoords.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.alt_msl_m))
+            GV.antennaAcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
             vbox.set_basepoint()
             point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
     elif GV.set_button == "Antenna B":
         if len(GV.antennaBcoords) < 1:
-            GV.antennaBcoords.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.alt_msl_m))
+            GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
             point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
 
 
@@ -394,7 +394,6 @@ def delete_last_point(l):
             GV.antennaBcoords.pop(-1)
             point.delete_antenna_b()
 
-# TODO fix properly
 def zoom_out(l):
     if int(GV.x_scale[0].replace("m", "")) < 15:
         x_scale_int = int(GV.x_scale[0].replace("m", ""))
