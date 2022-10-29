@@ -362,7 +362,7 @@ def set_cp(l):
     # TODO make sure that antenna A is set first
     if GV.set_button == "Points":
         if len(GV.cp_list) < 24:
-            GV.cp_list.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000))
+            GV.cp_list.append(((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.alt_msl_m))
             GV.cp_number[0] = str(len(GV.cp_list))
             point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
             Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y)
@@ -448,28 +448,40 @@ def save(l):
         f.write(us.pack('>H', 0))
         f.write(us.pack('>I', file_struct))
         f.write(us.pack('>I', file_struct))
-        f.write(us.pack('>H', 22))
+        f.write(us.pack('H', 22))
         f.write(b'Vehicle contact points')
-        f.write(us.pack('>H', 1080))
+        f.write(us.pack('H', 1080))
         f.write(us.pack('>I', 0xCCCCCCCC))
-        f.write(us.pack('>I', len(GV.cp_list)))
+        f.write(us.pack('I', len(GV.cp_list)))
         for vals in GV.antennaAcoords:
             for i in vals:
-                f.write(us.pack('>d', i))
-        f.write(us.pack('>f', -6500000.00))
-        f.write(us.pack('>f', -6500000.00))
-        f.write(us.pack('>f', -6500000.00))
-        f.write(us.pack('>f', -1.0))        
-        f.write(us.pack('>f', -6500000.00))
-        f.write(us.pack('>f', -6500000.00))
-        f.write(us.pack('>f', -6500000.00))
-        f.write(us.pack('>f', -1.0))
+                f.write(us.pack('d', i))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -1.0))        
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -1.0))
         for vals in GV.antennaAcoords:
             for i in vals:
-                f.write(us.pack('>d', i))
+                f.write(us.pack('d', i))
         for vals in GV.antennaBcoords:
             for i in vals:
-                f.write(us.pack('>d', i))
+                f.write(us.pack('d', i))
+        for vals in GV.cp_list:
+            for i in vals:
+                f.write(us.pack('d', i))
+        for i in range(24 - len(GV.cp_list)):
+            f.write(us.pack('f', -6500000.00))
+            f.write(us.pack('f', -6500000.00))
+            f.write(us.pack('f', -1.0))
+        for i in range(24):
+            f.write(us.pack('f', -6500000.00))
+            f.write(us.pack('f', -6500000.00))
+            f.write(us.pack('f', -6500000.00))
+            f.write(us.pack('f', -1.0))
         f.close()
 
 
