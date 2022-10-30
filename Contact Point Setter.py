@@ -356,26 +356,38 @@ def set_sats_status(state):
         GV.sats_colour[0] = gui.DL_COLOR(RED)
         gnss_status = False
 
+#TODO fix this
+# def rtk_flash():
+#     gui_list[11][1] = 200
+#     timer = vts.Timer(2000, True)
+#     while True:
+#         if timer == True:
+#             gui_list[11][1] = -200
+#             vts.Timer.destroy_all()
+#             break
+
 
 def set_cp(l):
-    # if sample.fix_type == 4:
     # TODO make sure that antenna A is set first
-    if GV.set_button == "Points":
-        if len(GV.cp_list) < 24:
-            GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
-            GV.cp_number[0] = str(len(GV.cp_list))
-            point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
-            Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y)
-    elif GV.set_button == "Antenna A":
-        if len(GV.antennaAcoords) < 1:
-            GV.a_set = True
-            GV.antennaAcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
-            vbox.set_basepoint()
-            point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
-    elif GV.set_button == "Antenna B":
-        if len(GV.antennaBcoords) < 1:
-            GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
-            point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
+    if sample.fix_type == 4:
+        if GV.set_button == "Points":
+            if len(GV.cp_list) < 24:
+                GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
+                GV.cp_number[0] = str(len(GV.cp_list))
+                point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
+                Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y)
+        elif GV.set_button == "Antenna A":
+            if len(GV.antennaAcoords) < 1:
+                GV.a_set = True
+                GV.antennaAcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
+                vbox.set_basepoint()
+                point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
+        elif GV.set_button == "Antenna B":
+            if len(GV.antennaBcoords) < 1:
+                GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
+                point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
+    else:
+        rtk_flash()
 
 
 def delete_last_point(l):
@@ -511,7 +523,9 @@ def main_screen():
         [gui.DL_POINT_SIZE(11)],
         [gui.DL_BEGIN(gui.PRIM_POINTS)],
         [gui.DL_VERTEX2F(ball.ball_pos_x, ball.ball_pos_y)],
-        [gui.DL_END()],]
+        [gui.DL_END()],
+        [gui.DL_COLOR_RGB(255, 0, 0)],
+        [gui.CTRL_TEXT, -200, 200, 32, gui.OPT_CENTERX,'RTK Required'],]
     gui_list.append(point.get_gui_list())
     gui_list.append(point.get_gui_a())
     gui_list.append(point.get_gui_b())
