@@ -57,6 +57,7 @@ class GV:
     a_set = False
     point_list = []
     vehicle_option_str = "Subject"
+    rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(800)]
 
 class ball_position:
 
@@ -219,14 +220,15 @@ def gnss_callback():
     if sample.sats_used > 3:
         GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
         GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-        if sample.fix_type > 1: #TODO change to rtk fix
+        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
             if ball.mid_lat == 0 and ball.mid_long == 0:
                 ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
                 ball.update_vals(200, 270)
                 ball.update()
             else:
                 position_calc()
-
+    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -335,9 +337,9 @@ def button_options():
 def set_gnss_btn_state(state):
     if state:
         get_picture_button('GNSS').set_colour((0, 255, 0))
-        if sample.fix_type == 4:
+        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
             get_picture_button('GNSS').set_colour((160, 32, 240))
-        elif sample.fix_type == 5:
+        elif sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FLOAT:
             get_picture_button('GNSS').set_colour((255, 95, 31))
     else:
         get_picture_button('GNSS').set_colour((255, 0,  0))
@@ -348,9 +350,9 @@ def set_sats_status(state):
     if sample.sats_used > 3:
         gnss_status = True
         GV.sats_colour[0] = gui.DL_COLOR(GREEN)
-        if sample.fix_type == 4:
+        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
             GV.sats_colour[0] = gui.DL_COLOR(PURPLE)
-        elif sample.fix_type == 5:
+        elif sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FLOAT:
             GV.sats_colour[0] = gui.DL_COLOR(ORANGE)
     else:
         GV.sats_colour[0] = gui.DL_COLOR(RED)
@@ -368,8 +370,9 @@ def set_sats_status(state):
 
 
 def set_cp(l):
+    global sample
     # TODO make sure that antenna A is set first
-    if sample.fix_type == 4:
+    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
         if GV.set_button == "Points":
             if len(GV.cp_list) < 24:
                 GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
@@ -386,8 +389,8 @@ def set_cp(l):
             if len(GV.antennaBcoords) < 1:
                 GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
                 point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
-    else:
-        rtk_flash()
+    else: 
+        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
 def delete_last_point(l):
@@ -524,8 +527,10 @@ def main_screen():
         [gui.DL_BEGIN(gui.PRIM_POINTS)],
         [gui.DL_VERTEX2F(ball.ball_pos_x, ball.ball_pos_y)],
         [gui.DL_END()],
+        GV.rtk_warning,
         [gui.DL_COLOR_RGB(255, 0, 0)],
-        [gui.CTRL_TEXT, -200, 200, 32, gui.OPT_CENTERX,'RTK Required'],]
+        [gui.CTRL_TEXT, 200, 200, 32, gui.OPT_CENTERX,'RTK Required'],
+        [gui.DL_VERTEX_TRANSLATE_X(0)],]
     gui_list.append(point.get_gui_list())
     gui_list.append(point.get_gui_a())
     gui_list.append(point.get_gui_b())
@@ -589,6 +594,9 @@ def main_screen():
 
 def main():
     global bank, antenna_or_cp_button, ball, point, subject_or_target
+    vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
+    vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
+    vbox.cfg_gnss({'DGPS Baudrate':115200}) # Set RTK Baud rate to 115200 - May need settings option in future
     antenna_or_cp_button = LoopingButton(630, 300, 160, 60, [x[0] for x in antenna_dir.values()], 30, set_antenna_or_cp)
     subject_or_target = LoopingButton(630, 100, 160, 60, [x[0] for x in vehicle_option_dir.values()], 30, vehicle_option)
     ball = ball_position()
