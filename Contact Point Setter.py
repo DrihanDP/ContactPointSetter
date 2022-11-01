@@ -358,16 +358,6 @@ def set_sats_status(state):
         GV.sats_colour[0] = gui.DL_COLOR(RED)
         gnss_status = False
 
-#TODO fix this
-# def rtk_flash():
-#     gui_list[11][1] = 200
-#     timer = vts.Timer(2000, True)
-#     while True:
-#         if timer == True:
-#             gui_list[11][1] = -200
-#             vts.Timer.destroy_all()
-#             break
-
 
 def set_cp(l):
     global sample
