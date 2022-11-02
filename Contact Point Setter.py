@@ -436,21 +436,25 @@ def save(l):
         file_struct = 0
         if GV.vehicle_option_str == "Subject":
             file_name = "Subject.VBC"
-            file_struct |= (1 << 4)
+            file_struct = 5
+            # file_struct |= (1 << 4)
         elif GV.vehicle_option_str == "Target 1":
             file_name = "Target_1.VBC"
-            file_struct |= (1 << 5)
+            file_struct = 6
+            # file_struct |= (1 << 5)
         elif GV.vehicle_option_str == "Target 2":
             file_name = "Target_2.VBC"
-            file_struct |= (1 << 6)
+            file_struct = 7
+            # file_struct |= (1 << 6)
         elif GV.vehicle_option_str == "Target 3":
             file_name = "Target_3.VBC"
-            file_struct |= (1 << 8)
+            file_struct = 9
+            # file_struct |= (1 << 8)
         f = open(file_name, 'wb')
         f.write(b"RLVB3iCFG")
         f.write(us.pack('>H', 0x55AA))
         f.write(us.pack('>H', 0))
-        f.write(us.pack('>I', file_struct))
+        f.write(us.pack('<I', file_struct))
         f.write(us.pack('>I', file_struct))
         f.write(us.pack('I', 22))
         f.write(b'Vehicle contact points')
