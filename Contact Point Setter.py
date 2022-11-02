@@ -452,7 +452,7 @@ def save(l):
         f.write(us.pack('>H', 0))
         f.write(us.pack('>I', file_struct))
         f.write(us.pack('>I', file_struct))
-        f.write(us.pack('H', 22))
+        f.write(us.pack('I', 22))
         f.write(b'Vehicle contact points')
         f.write(us.pack('H', 1080))
         f.write(us.pack('>I', 0xCCCCCCCC))
