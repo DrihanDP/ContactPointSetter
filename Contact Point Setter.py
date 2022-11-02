@@ -13,8 +13,8 @@ import ustruct as us
 
 RED = const(0xFF0000)
 GREEN = const(0x00FF00)
-PURPLE = const(0xA020F0)
-ORANGE = const(0xFF5F1F)
+PURPLE = const(0xFF00FF)
+ORANGE = const(0xFF8000)
 gnss_status = False
 
 
@@ -338,9 +338,9 @@ def set_gnss_btn_state(state):
     if state:
         get_picture_button('GNSS').set_colour((0, 255, 0))
         if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-            get_picture_button('GNSS').set_colour((160, 32, 240))
+            get_picture_button('GNSS').set_colour((255, 0, 255))
         elif sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FLOAT:
-            get_picture_button('GNSS').set_colour((255, 95, 31))
+            get_picture_button('GNSS').set_colour((255, 128, 0))
     else:
         get_picture_button('GNSS').set_colour((255, 0,  0))
 
