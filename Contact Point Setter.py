@@ -436,31 +436,52 @@ def save(l):
         file_struct = 0
         if GV.vehicle_option_str == "Subject":
             file_name = "Subject.VBC"
-            file_struct = 5
+            file_struct_forward = 5
+            file_struct_backwards = 40
             # file_struct |= (1 << 4)
         elif GV.vehicle_option_str == "Target 1":
             file_name = "Target_1.VBC"
-            file_struct = 6
+            file_struct_forward = 6
+            file_struct_backwards = 72
             # file_struct |= (1 << 5)
         elif GV.vehicle_option_str == "Target 2":
             file_name = "Target_2.VBC"
-            file_struct = 7
+            file_struct_forward = 7
+            file_struct_backwards = 520
             # file_struct |= (1 << 6)
         elif GV.vehicle_option_str == "Target 3":
             file_name = "Target_3.VBC"
-            file_struct = 9
+            file_struct_forward = 9
+            file_struct_backwards = 136
             # file_struct |= (1 << 8)
         f = open(file_name, 'wb')
         f.write(b"RLVB3iCFG")
         f.write(us.pack('>H', 0x55AA))
         f.write(us.pack('>H', 0))
-        f.write(us.pack('<I', file_struct))
-        f.write(us.pack('>I', file_struct))
-        f.write(us.pack('I', 22))
+        f.write(us.pack('<I', file_struct_backwards))
+        f.write(us.pack('<I', file_struct_forward))
+        f.write(us.pack('H', 22))
         f.write(b'Vehicle contact points')
         f.write(us.pack('H', 1080))
         f.write(us.pack('>I', 0xCCCCCCCC))
         f.write(us.pack('I', len(GV.cp_list)))
+        f.write(us.pack('q', 0))
+        f.write(us.pack('q', 0))
+        f.write(us.pack('q', 0))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -1.0))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -6500000.00))
+        f.write(us.pack('f', -1.0)) 
+        f.write(us.pack('q', 0))
+        f.write(us.pack('q', 0))
+        f.write(us.pack('q', 0))
+        f.write(us.pack('q', 0))
+        f.write(us.pack('q', 0))
+        f.write(us.pack('q', 0))
         for vals in GV.antennaAcoords:
             for i in vals:
                 f.write(us.pack('d', i))
