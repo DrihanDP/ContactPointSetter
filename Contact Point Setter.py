@@ -220,15 +220,15 @@ def gnss_callback():
     if sample.sats_used > 3:
         GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
         GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-        if sample.fix_type > 1: #== vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
+        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
             if ball.mid_lat == 0 and ball.mid_long == 0:
                 ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
                 ball.update_vals(200, 270)
                 ball.update()
             else:
                 position_calc()
-    # if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-    #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -362,7 +362,7 @@ def set_sats_status(state):
 def set_cp(l):
     global sample
     # TODO make sure that antenna A is set first
-    if sample.fix_type > 1: # == vbox.VBOX_FIXTYPE_RTK_FIXED:
+    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
         if GV.set_button == "Points":
             if len(GV.cp_list) < 24:
                 GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
@@ -379,8 +379,8 @@ def set_cp(l):
             if len(GV.antennaBcoords) < 1:
                 GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
                 point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
-    # else: 
-    #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
+    else: 
+        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
 def delete_last_point(l):
