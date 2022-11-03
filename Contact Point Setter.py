@@ -389,7 +389,7 @@ def delete_last_point(l):
             point.remove_contact_point(len(GV.cp_list))
             GV.cp_list.pop(-1)
             GV.cp_number[0] = str(int(GV.cp_number[0]) - 1)
-            Point_position.delete_position()
+            Point_position.delete_position(GV.point_list)
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) == 1:
             GV.antennaAcoords.pop(-1)
