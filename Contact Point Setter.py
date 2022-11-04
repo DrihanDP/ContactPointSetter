@@ -214,21 +214,22 @@ def position_calc():
 
 def gnss_callback():
     global sample
-    sample = vbox.get_sample_hp()
-    set_sats_status(gnss_status)
-    GV.sats[0] = "{}".format(sample.sats_used)
-    if sample.sats_used > 3:
-        GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
-        GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
-            if ball.mid_lat == 0 and ball.mid_long == 0:
-                ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
-                ball.update_vals(200, 270)
-                ball.update()
-            else:
-                position_calc()
-    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+    while vbox.samples_pending():
+        sample = vbox.get_sample_hp()
+        set_sats_status(gnss_status)
+        GV.sats[0] = "{}".format(sample.sats_used)
+        if sample.sats_used > 3:
+            GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
+            GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
+            if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
+                if ball.mid_lat == 0 and ball.mid_long == 0:
+                    ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
+                    ball.update_vals(200, 270)
+                    ball.update()
+                else:
+                    position_calc()
+        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+            GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -436,81 +437,56 @@ def save(l):
         file_struct = 0
         if GV.vehicle_option_str == "Subject":
             file_name = "Subject.VBC"
-            file_struct_forward = 5
-            file_struct_backwards = 40
-            # file_struct |= (1 << 4)
+            file_struct |= (1 << 5)
         elif GV.vehicle_option_str == "Target 1":
             file_name = "Target_1.VBC"
-            file_struct_forward = 6
-            file_struct_backwards = 72
-            # file_struct |= (1 << 5)
+            file_struct |= (1 << 6)
         elif GV.vehicle_option_str == "Target 2":
             file_name = "Target_2.VBC"
-            file_struct_forward = 7
-            file_struct_backwards = 520
-            # file_struct |= (1 << 6)
+            file_struct |= (1 << 7)
         elif GV.vehicle_option_str == "Target 3":
             file_name = "Target_3.VBC"
-            file_struct_forward = 9
-            file_struct_backwards = 136
-            # file_struct |= (1 << 8)
+            file_struct |= (1 << 9)
         f = open(file_name, 'wb')
         f.write(b"RLVB3iCFG")
-        f.write(us.pack('>H', 0x55AA))
+        f.write(us.pack('H', 0x55AA))
         f.write(us.pack('>H', 0))
-        f.write(us.pack('<I', file_struct_backwards))
-        f.write(us.pack('<I', file_struct_forward))
-        f.write(us.pack('H', 22))
+        f.write(us.pack('>I', file_struct))
+        f.write(us.pack('>I', 5))
+        f.write(us.pack('>H', 22))
         f.write(b'Vehicle contact points')
-        f.write(us.pack('H', 1080))
+        f.write(us.pack('>H', 1080))
         f.write(us.pack('>I', 0xCCCCCCCC))
-        f.write(us.pack('I', len(GV.cp_list)))
-        f.write(us.pack('q', 0))
-        f.write(us.pack('q', 0))
-        f.write(us.pack('q', 0))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -1.0))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -1.0)) 
-        f.write(us.pack('q', 0))
-        f.write(us.pack('q', 0))
-        f.write(us.pack('q', 0))
-        f.write(us.pack('q', 0))
-        f.write(us.pack('q', 0))
-        f.write(us.pack('q', 0))
+        f.write(us.pack('>I', len(GV.cp_list)))
         for vals in GV.antennaAcoords:
             for i in vals:
-                f.write(us.pack('d', i))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -1.0))        
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -6500000.00))
-        f.write(us.pack('f', -1.0))
+                f.write(us.pack('>d', i))
+        f.write(us.pack('>f', -6500000.00))
+        f.write(us.pack('>f', -6500000.00))
+        f.write(us.pack('>f', -6500000.00))
+        f.write(us.pack('>f', -1.0))        
+        f.write(us.pack('>f', -6500000.00))
+        f.write(us.pack('>f', -6500000.00))
+        f.write(us.pack('>f', -6500000.00))
+        f.write(us.pack('>f', -1.0))
         for vals in GV.antennaAcoords:
             for i in vals:
-                f.write(us.pack('d', i))
+                f.write(us.pack('>d', i))
         for vals in GV.antennaBcoords:
             for i in vals:
-                f.write(us.pack('d', i))
+                f.write(us.pack('>d', i))
         for vals in GV.cp_list:
             for i in vals:
-                f.write(us.pack('d', i))
+                f.write(us.pack('>d', i))
         for i in range(24 - len(GV.cp_list)):
-            f.write(us.pack('f', -6500000.00))
-            f.write(us.pack('f', -6500000.00))
-            f.write(us.pack('f', -1.0))
+            f.write(us.pack('>f', -6500000.00))
+            f.write(us.pack('>f', -6500000.00))
+            f.write(us.pack('>f', -1.0))
         for i in range(24):
-            f.write(us.pack('f', -6500000.00))
-            f.write(us.pack('f', -6500000.00))
-            f.write(us.pack('f', -6500000.00))
-            f.write(us.pack('f', -1.0))
+            f.write(us.pack('>f', -6500000.00))
+            f.write(us.pack('>f', -6500000.00))
+            f.write(us.pack('>f', -6500000.00))
+            f.write(us.pack('>f', -1.0))
         f.close()
 
 
@@ -582,6 +558,7 @@ def main_screen():
         [gui.CTRL_TEXT, 100, 440, 27, 0, GV.lat],
         [gui.CTRL_TEXT, 0, 460, 27, 0, 'Longitude:'],
         [gui.CTRL_TEXT, 100, 460, 27, 0, GV.long],
+        # TODO move to left hand side (make smaller)
         [gui.CTRL_TEXT, 450, 60, 30, 0, "Points set:"],
         [gui.CTRL_TEXT, 650, 60, 30, 0, GV.cp_number],
         [gui.CTRL_TEXT, 650, 360, 30, 0, 'Set point'],
@@ -603,6 +580,13 @@ def main_screen():
         [gui.CTRL_FLATBUTTON, 450, 300, 160, 60, 30, 'Delete', delete_last_point],
         [gui.CTRL_FLATBUTTON, 450, 200, 160, 60, 30, 'Save', save],
         [gui.CTRL_FLATBUTTON, 630, 200, 160, 60, 30, 'Upload', upload_points],
+        [gui.DL_COLOR_A(150)],
+        [gui.DL_COLOR(0x5D5C5B)],
+        [gui.DL_BEGIN(gui.PRIM_RECTS)],
+        [gui.DL_VERTEX2F(630, 200)],
+        [gui.DL_VERTEX2F(630+160, 200+60)],
+        [gui.DL_END()],
+        [gui.DL_COLOR_A(255)],
     ])
     gui.show(gui_list)
 
@@ -632,6 +616,8 @@ def main():
             pass
         else:
             print(e)
+    while vbox.samples_pending():
+        _ = vbox.get_sample_hp()
     vbox.set_new_data_callback(gnss_callback)
 
 main()
