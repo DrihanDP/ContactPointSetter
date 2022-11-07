@@ -10,3 +10,4 @@ move lat and long to in the "graph" and make it small/remove lat and long
 Add a looping button to determine if points are for subject, T1, T2, or T3
 upload button to send the vbc file via serial to the VB3i 
 add looping button for subject/target?
+reset button - add confirmation 
