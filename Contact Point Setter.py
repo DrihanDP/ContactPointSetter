@@ -407,8 +407,8 @@ def zoom_out(l):
         GV.x_scale[0] = (str(x_scale_int + 1) + "m")
         GV.y_scale[0] = (str(y_scale_int + 1) + "m")
         for x in range(len(GV.point_list)):
-            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2])) - 0.63)+ 200
-            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3])) - 0.2) + 270         
+            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * float(GV.point_list[x][2])) + 200
+            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * float(GV.point_list[x][3])) + 270         
             point.set_contact_point(x + 1, pixel_change_x, pixel_change_y)
             GV.point_list[x][4] = pixel_change_x
             GV.point_list[x][5] = pixel_change_y
@@ -423,11 +423,12 @@ def zoom_in(l):
         GV.x_scale[0] = (str(x_scale_int - 1) + "m")
         GV.y_scale[0] = (str(y_scale_int - 1) + "m")
         for x in range(len(GV.point_list)):
-            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * (float(GV.point_list[x][2])) - 0.63) + 200
-            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * (float(GV.point_list[x][3])) - 0.2) + 270
+            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * float(GV.point_list[x][2])) + 200
+            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * float(GV.point_list[x][3])) + 270
             point.set_contact_point(x + 1, pixel_change_x, pixel_change_y)
             GV.point_list[x][4] = pixel_change_x
             GV.point_list[x][5] = pixel_change_y
+        print(point.set_b[0])
     else:
         pass
 
@@ -490,7 +491,7 @@ def save(l):
         f.close()
 
 
-def upload_points():
+def upload_points(l):
     pass
 
 
@@ -519,6 +520,7 @@ def main_screen():
         [gui.DL_VERTEX2F(ball.ball_pos_x, ball.ball_pos_y)],
         [gui.DL_END()],
         GV.rtk_warning,
+        # TODO move to back so that is appears on top of all the dots
         [gui.DL_COLOR_RGB(255, 0, 0)],
         [gui.CTRL_TEXT, 200, 200, 32, gui.OPT_CENTERX,'RTK Required'],
         [gui.DL_VERTEX_TRANSLATE_X(0)],]
@@ -559,34 +561,30 @@ def main_screen():
         [gui.CTRL_TEXT, 0, 460, 27, 0, 'Longitude:'],
         [gui.CTRL_TEXT, 100, 460, 27, 0, GV.long],
         # TODO move to left hand side (make smaller)
-        [gui.CTRL_TEXT, 450, 60, 30, 0, "Points set:"],
-        [gui.CTRL_TEXT, 650, 60, 30, 0, GV.cp_number],
-        [gui.CTRL_TEXT, 650, 360, 30, 0, 'Set point'],
-        [gui.CTRL_TEXT, 494, 360, 30, 0, 'Zoom'],
-        [gui.CTRL_TEXT, 670, 260, 30, 0, 'To set'],
-        [gui.CTRL_TEXT, 450, 260, 30, 0, 'Delete Last'],
-        [gui.CTRL_TEXT, 450, 160, 30, 0, 'Save to SD'],
-        [gui.CTRL_TEXT, 615, 160, 30, 0, 'Serial upload'],
+        [gui.CTRL_TEXT, 5, 65, 28, 0, "Points set:"],
+        [gui.CTRL_TEXT, 115, 66, 28, 0, GV.cp_number],
+        [gui.CTRL_TEXT, 640, 370, 30, 0, 'Set point'],
+        [gui.CTRL_TEXT, 469, 370, 30, 0, 'Zoom'],
+        [gui.CTRL_TEXT, 660, 270, 30, 0, 'To set'],
+        [gui.CTRL_TEXT, 425, 270, 30, 0, 'Delete last'],
+        [gui.CTRL_TEXT, 425, 170, 30, 0, 'Save to SD'],
+        [gui.CTRL_TEXT, 610, 170, 30, 0, 'Serial upload'],
+        [gui.CTRL_TEXT, 435, 70, 30, 0, 'Coldstart'],
+        [gui.CTRL_TEXT, 615, 70, 30, 0, 'Subject/Trg'],
     ])
     gui_list.extend(button_options())
     gui_list.extend([
         [gui.DL_COLOR_RGB(255, 255, 255)],
         antenna_or_cp_button(),
         subject_or_target(),
-        [gui.CTRL_FLATBUTTON, 450, 100, 160, 60, 30, 'Coldstart', coldstart_cb],
-        [gui.CTRL_FLATBUTTON, 630, 400, 160, 60, 30, 'Set', set_cp],
-        [gui.CTRL_FLATBUTTON, 535, 400, 75, 60, 30, '+', zoom_in],
-        [gui.CTRL_FLATBUTTON, 450, 400, 75, 60, 30, '-', zoom_out],
-        [gui.CTRL_FLATBUTTON, 450, 300, 160, 60, 30, 'Delete', delete_last_point],
-        [gui.CTRL_FLATBUTTON, 450, 200, 160, 60, 30, 'Save', save],
-        [gui.CTRL_FLATBUTTON, 630, 200, 160, 60, 30, 'Upload', upload_points],
-        [gui.DL_COLOR_A(150)],
-        [gui.DL_COLOR(0x5D5C5B)],
-        [gui.DL_BEGIN(gui.PRIM_RECTS)],
-        [gui.DL_VERTEX2F(630, 200)],
-        [gui.DL_VERTEX2F(630+160, 200+60)],
-        [gui.DL_END()],
-        [gui.DL_COLOR_A(255)],
+        [gui.CTRL_FLATBUTTON, 425, 110, 160, 60, 30, 'Coldstart', coldstart_cb],
+        [gui.CTRL_FLATBUTTON, 620, 410, 160, 60, 30, 'Set', set_cp],
+        [gui.CTRL_FLATBUTTON, 510, 410, 75, 60, 30, '+', zoom_in],
+        [gui.CTRL_FLATBUTTON, 425, 410, 75, 60, 30, '-', zoom_out],
+        [gui.CTRL_FLATBUTTON, 425, 310, 160, 60, 30, 'Delete', delete_last_point],
+        [gui.CTRL_FLATBUTTON, 425, 210, 160, 60, 30, 'Save', save],
+        [gui.DL_COLOR_RGB(180, 180, 180)],
+        [gui.CTRL_FLATBUTTON, 620, 210, 160, 60, 30, 'Upload', upload_points],
     ])
     gui.show(gui_list)
 
@@ -596,8 +594,8 @@ def main():
     vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
     vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
     vbox.cfg_gnss({'DGPS Baudrate':115200}) # Set RTK Baud rate to 115200 - May need settings option in future
-    antenna_or_cp_button = LoopingButton(630, 300, 160, 60, [x[0] for x in antenna_dir.values()], 30, set_antenna_or_cp)
-    subject_or_target = LoopingButton(630, 100, 160, 60, [x[0] for x in vehicle_option_dir.values()], 30, vehicle_option)
+    antenna_or_cp_button = LoopingButton(620, 310, 160, 60, [x[0] for x in antenna_dir.values()], 30, set_antenna_or_cp)
+    subject_or_target = LoopingButton(620, 110, 160, 60, [x[0] for x in vehicle_option_dir.values()], 30, vehicle_option)
     ball = ball_position()
     point = Point()
     bank = Image_Bank((
