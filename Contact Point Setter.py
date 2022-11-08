@@ -522,7 +522,7 @@ def main_screen():
         GV.rtk_warning,
         # TODO move to back so that is appears on top of all the dots
         [gui.DL_COLOR_RGB(255, 0, 0)],
-        [gui.CTRL_TEXT, 200, 200, 32, gui.OPT_CENTERX,'RTK Required'],
+        [gui.CTRL_TEXT, 200, 220, 32, gui.OPT_CENTERX,'RTK Required'],
         [gui.DL_VERTEX_TRANSLATE_X(0)],]
     gui_list.append(point.get_gui_list())
     gui_list.append(point.get_gui_a())
