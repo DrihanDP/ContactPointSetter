@@ -271,7 +271,7 @@ def pass_cb(l):
 def centre_graph_cb(l):
     pass
 
-# TODO reset ball centre point 
+
 def reset_cp(l):
     for x in range(25):
         point.remove_contact_point(x)
@@ -583,7 +583,6 @@ def main_screen():
         [gui.CTRL_TEXT, 100, 440, 27, 0, GV.lat],
         [gui.CTRL_TEXT, 0, 460, 27, 0, 'Longitude:'],
         [gui.CTRL_TEXT, 100, 460, 27, 0, GV.long],
-        # TODO move to left hand side (make smaller)
         [gui.CTRL_TEXT, 5, 65, 28, 0, "Points set:"],
         [gui.CTRL_TEXT, 115, 66, 28, 0, GV.cp_number],
         [gui.CTRL_TEXT, 700, 370, 30, gui.OPT_CENTERX, 'Set point'],
