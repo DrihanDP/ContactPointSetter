@@ -58,6 +58,7 @@ class GV:
     point_list = []
     vehicle_option_str = "Subject"
     rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(800)]
+    antenna_b = []
 
 class ball_position:
 
@@ -84,7 +85,7 @@ class ball_position:
 class Point:
 
     def __init__(self):
-        self.x_y_list = []
+        self.y_m_list = []
         self.stored_points_colour = [gui.DL_COLOR_RGB(0,0,0xFF)]
         self.antenna_colour = [gui.DL_COLOR_RGB(150, 0, 0)]
         self.set_points =  [
@@ -186,12 +187,12 @@ class Point_position:
         self.point_lat = self.point_lat
         self.point_long = self.point_long
         self.point_x_m = self.point_x_m
-        self.point_x_y = self.point_x_y
+        self.point_y_m = self.point_y_m
         self.point_pixel_x = self.point_pixel_x
         self.point_pixel_y = self.point_pixel_y
 
-    def get_point_position(point_lat, point_long, point_x_m, point_x_y, point_pixel_x, point_pixel_y):
-        GV.point_list.append([point_lat, point_long, point_x_m, point_x_y, point_pixel_x, point_pixel_y])
+    def get_point_position(point_lat, point_long, point_x_m, point_y_m, point_pixel_x, point_pixel_y):
+        GV.point_list.append([point_lat, point_long, point_x_m, point_y_m, point_pixel_x, point_pixel_y])
     
     def delete_position(self):
         GV.point_list.pop(-1)
@@ -380,6 +381,7 @@ def set_cp(l):
             if len(GV.antennaBcoords) < 1:
                 GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
                 point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
+                GV.antenna_b = [(sample.x_m, sample.y_m)]
     else: 
         GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
@@ -400,6 +402,7 @@ def delete_last_point(l):
             GV.antennaBcoords.pop(-1)
             point.delete_antenna_b()
 
+
 def zoom_out(l):
     if int(GV.x_scale[0].replace("m", "")) < 15:
         x_scale_int = int(GV.x_scale[0].replace("m", ""))
@@ -412,6 +415,12 @@ def zoom_out(l):
             point.set_contact_point(x + 1, pixel_change_x, pixel_change_y)
             GV.point_list[x][4] = pixel_change_x
             GV.point_list[x][5] = pixel_change_y
+        for vals in range(len(GV.antenna_b)):
+            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * float(GV.antenna_b[vals][0])) + 200
+            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * float(GV.antenna_b[vals][1])) + 270
+            point.set_antenna_b(pixel_change_x, pixel_change_y)
+            # GV.antenna_b[vals][0] = pixel_change_x
+            # GV.antenna_b[vals][1] = pixel_change_y
     else:
         pass
 
@@ -428,7 +437,14 @@ def zoom_in(l):
             point.set_contact_point(x + 1, pixel_change_x, pixel_change_y)
             GV.point_list[x][4] = pixel_change_x
             GV.point_list[x][5] = pixel_change_y
-        print(point.set_b[0])
+        for vals in range(len(GV.antenna_b)):
+            pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * float(GV.antenna_b[vals][0])) + 200
+            pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * float(GV.antenna_b[vals][1])) + 270
+            point.set_antenna_b(pixel_change_x, pixel_change_y)
+            # print(GV.antenna_b[vals][0])
+            # GV.antenna_b[vals][0] = pixel_change_x
+            # print(GV.antenna_b[vals][0])
+            # GV.antenna_b[vals][1] = pixel_change_y
     else:
         pass
 
@@ -563,14 +579,14 @@ def main_screen():
         # TODO move to left hand side (make smaller)
         [gui.CTRL_TEXT, 5, 65, 28, 0, "Points set:"],
         [gui.CTRL_TEXT, 115, 66, 28, 0, GV.cp_number],
-        [gui.CTRL_TEXT, 640, 370, 30, 0, 'Set point'],
-        [gui.CTRL_TEXT, 469, 370, 30, 0, 'Zoom'],
-        [gui.CTRL_TEXT, 660, 270, 30, 0, 'To set'],
-        [gui.CTRL_TEXT, 425, 270, 30, 0, 'Delete last'],
-        [gui.CTRL_TEXT, 425, 170, 30, 0, 'Save to SD'],
-        [gui.CTRL_TEXT, 610, 170, 30, 0, 'Serial upload'],
-        [gui.CTRL_TEXT, 435, 70, 30, 0, 'Coldstart'],
-        [gui.CTRL_TEXT, 615, 70, 30, 0, 'Subject/Trg'],
+        [gui.CTRL_TEXT, 700, 370, 30, gui.OPT_CENTERX, 'Set point'],
+        [gui.CTRL_TEXT, 500, 370, 30, gui.OPT_CENTERX, 'Zoom'],
+        [gui.CTRL_TEXT, 700, 270, 30, gui.OPT_CENTERX, 'To set'],
+        [gui.CTRL_TEXT, 500, 270, 30, gui.OPT_CENTERX, 'Delete last'],
+        [gui.CTRL_TEXT, 500, 170, 30, gui.OPT_CENTERX, 'Save to SD'],
+        [gui.CTRL_TEXT, 700, 170, 30, gui.OPT_CENTERX, 'Serial upload'],
+        [gui.CTRL_TEXT, 500, 70, 30, gui.OPT_CENTERX, 'Coldstart'],
+        [gui.CTRL_TEXT, 700, 70, 30, gui.OPT_CENTERX, 'Role'],
     ])
     gui_list.extend(button_options())
     gui_list.extend([
