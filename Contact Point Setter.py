@@ -615,9 +615,9 @@ def main():
     ball = ball_position()
     point = Point()
     bank = Image_Bank((
-        ('/sd/icon-reset.png', 'Reset'),
-        ('/sd/icons8-gnss-50.png', 'GNSS'),
-        ('/sd/centre_icon.png', 'Centre')
+        ('/icon-reset.png', 'Reset'),
+        ('/icons8-gnss-50.png', 'GNSS'),
+        ('/centre_icon.png', 'Centre')
     ))
     init_buttons()
     main_screen()
