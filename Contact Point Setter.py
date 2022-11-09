@@ -222,15 +222,15 @@ def gnss_callback():
         if sample.sats_used > 3:
             GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
             GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-            if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
+            if sample.fix_type > 1: #== vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
                 if ball.mid_lat == 0 and ball.mid_long == 0:
                     ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
                     ball.update_vals(200, 270)
                     ball.update()
                 else:
                     position_calc()
-        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-            GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+        # if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+        #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -271,7 +271,7 @@ def pass_cb(l):
 def centre_graph_cb(l):
     pass
 
-
+# TODO reset ball centre point 
 def reset_cp(l):
     for x in range(25):
         point.remove_contact_point(x)
@@ -281,6 +281,10 @@ def reset_cp(l):
     GV.cp_list = []
     GV.antennaAcoords = []
     GV.antennaBcoords = []
+    GV.point_list = []
+    GV.antenna_b = []
+    ball.mid_vals(0, 0)
+    GV.a_set = False
 
 
 def get_picture_button(name):
@@ -363,27 +367,30 @@ def set_sats_status(state):
 
 def set_cp(l):
     global sample
-    # TODO make sure that antenna A is set first
-    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-        if GV.set_button == "Points":
-            if len(GV.cp_list) < 24:
-                GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
-                GV.cp_number[0] = str(len(GV.cp_list))
-                point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
-                Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y)
-        elif GV.set_button == "Antenna A":
-            if len(GV.antennaAcoords) < 1:
-                GV.a_set = True
-                GV.antennaAcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
-                vbox.set_basepoint()
-                point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
-        elif GV.set_button == "Antenna B":
-            if len(GV.antennaBcoords) < 1:
-                GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
-                point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
-                GV.antenna_b = [(sample.x_m, sample.y_m)]
-    else: 
-        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
+    if sample.fix_type > 1: # == vbox.VBOX_FIXTYPE_RTK_FIXED:
+        if GV.a_set == True:
+            if GV.set_button == "Points":
+                if len(GV.cp_list) < 24:
+                    GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
+                    GV.cp_number[0] = str(len(GV.cp_list))
+                    point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
+                    Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y)
+            elif GV.set_button == "Antenna B":
+                if len(GV.antennaBcoords) < 1:
+                    GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
+                    point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
+                    GV.antenna_b = [(sample.x_m, sample.y_m)]
+        else:
+            if GV.set_button == "Antenna A":
+                if len(GV.antennaAcoords) < 1:
+                    GV.a_set = True
+                    GV.antennaAcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
+                    vbox.set_basepoint()
+                    point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
+            else:
+                pass
+    # else: 
+    #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
 def delete_last_point(l):
@@ -599,7 +606,7 @@ def main_screen():
         [gui.CTRL_FLATBUTTON, 425, 410, 75, 60, 30, '-', zoom_out],
         [gui.CTRL_FLATBUTTON, 425, 310, 160, 60, 30, 'Delete', delete_last_point],
         [gui.CTRL_FLATBUTTON, 425, 210, 160, 60, 30, 'Save', save],
-        [gui.DL_COLOR_RGB(180, 180, 180)],
+        [gui.DL_COLOR_RGB(200, 200, 200)],
         [gui.CTRL_FLATBUTTON, 620, 210, 160, 60, 30, 'Upload', upload_points],
     ])
     gui.show(gui_list)
@@ -615,9 +622,9 @@ def main():
     ball = ball_position()
     point = Point()
     bank = Image_Bank((
-        ('/icon-reset.png', 'Reset'),
-        ('/icons8-gnss-50.png', 'GNSS'),
-        ('/centre_icon.png', 'Centre')
+        ('/sd/icon-reset.png', 'Reset'),
+        ('/sd/icons8-gnss-50.png', 'GNSS'),
+        ('/sd/centre_icon.png', 'Centre')
     ))
     init_buttons()
     main_screen()
