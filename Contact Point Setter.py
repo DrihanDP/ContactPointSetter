@@ -210,6 +210,7 @@ def position_calc(): # calculates the position of the ball on the screen
 
 
 def gnss_callback():
+    # gets and processes GNSS samples
     global sample
     while vbox.samples_pending():
         sample = vbox.get_sample_hp()
@@ -227,6 +228,7 @@ def gnss_callback():
                     position_calc()
         if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
             GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -268,7 +270,7 @@ def centre_graph_cb(l):
     pass
 
 
-def reset_cp(l):
+def reset_cp(l): # completely resets all of the check points and antennas
     for x in range(25):
         point.remove_contact_point(x)
     point.delete_antenna_a()
@@ -297,7 +299,7 @@ def wrap_callback(callback):
     return cb
 
 
-def create_buttons(*args):
+def create_buttons(*args): # creates picture buttons from imported picutres
     global buttons
     buttons = []
     if 'Reset' in args:
@@ -321,7 +323,7 @@ def create_buttons(*args):
     return button_cbs_l, button_icons_l
 
 
-def init_buttons():
+def init_buttons(): # dictates where the buttons will appear
     global button_layouts
     button_layouts = {}
     button_layouts['main'] = create_buttons('Reset', 'GNSS', 'Centre')
@@ -336,7 +338,7 @@ def button_options():
     return gui_buttons
 
 
-def set_gnss_btn_state(state):
+def set_gnss_btn_state(state): # changes the satellite image colour depending on fix type
     if state:
         get_picture_button('GNSS').set_colour((0, 255, 0))
         if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
@@ -347,7 +349,7 @@ def set_gnss_btn_state(state):
         get_picture_button('GNSS').set_colour((255, 0,  0))
 
 
-def set_sats_status(state):
+def set_sats_status(state): # sets satellite counter colour depending on fix type
     global gnss_status
     if sample.sats_used > 3:
         gnss_status = True
@@ -361,16 +363,16 @@ def set_sats_status(state):
         gnss_status = False
 
 
-def set_cp(l):
+def set_cp(l): # sets contact point when 'set' is pressed 
     global sample
-    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-        if GV.a_set == True:
+    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
+        if GV.a_set == True: # ensures antenna A is set first
             if GV.set_button == "Points":
                 if len(GV.cp_list) < 24:
-                    GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
-                    GV.cp_number[0] = str(len(GV.cp_list))
-                    point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y)
-                    Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y)
+                    GV.cp_list.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m)) # appends relevant contact point data to a list
+                    GV.cp_number[0] = str(len(GV.cp_list)) # updates number of contact points
+                    point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y) # sets pixel x and y position
+                    Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y) # gets relevant information for that point
             elif GV.set_button == "Antenna B":
                 if len(GV.antennaBcoords) < 1:
                     GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
@@ -389,7 +391,7 @@ def set_cp(l):
         GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
-def delete_last_point(l):
+def delete_last_point(l): # deletes the last point depending on the what is being set
     if GV.set_button == "Points":
         if len(GV.cp_list) > 0:
             point.remove_contact_point(len(GV.cp_list))
@@ -406,7 +408,7 @@ def delete_last_point(l):
             point.delete_antenna_b()
 
 
-def zoom_out(l):
+def zoom_out(l): # zooms in around antenna A
     if int(GV.x_scale[0].replace("m", "")) < 15:
         x_scale_int = int(GV.x_scale[0].replace("m", ""))
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
@@ -426,7 +428,7 @@ def zoom_out(l):
         pass
 
 
-def zoom_in(l):
+def zoom_in(l): # zooms out around antenna A
     if int(GV.x_scale[0].replace("m", "")) > 1:
         x_scale_int = int(GV.x_scale[0].replace("m", ""))
         y_scale_int = int(GV.y_scale[0].replace("m", ""))
@@ -447,6 +449,7 @@ def zoom_in(l):
 
 
 def save(l):
+    # saves the selected role to the units SD card in a VBC file format
     if vts.sd_present() == True:
         file_struct = 0
         if GV.vehicle_option_str == "Subject":
@@ -519,7 +522,7 @@ def vsync_cb(b):
     gui.redraw()
 
 
-def main_screen():
+def main_screen(): # display list
     global gui_list
     gui_list = [
         [gui.EVT_VSYNC, vsync_cb],
