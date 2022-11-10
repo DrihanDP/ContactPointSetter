@@ -10,7 +10,7 @@ import gnss
 import vbox
 import ustruct as us
 
-
+# Constants
 RED = const(0xFF0000)
 GREEN = const(0x00FF00)
 PURPLE = const(0xFF00FF)
@@ -26,13 +26,13 @@ Subject = const(0)
 Target1 = const(1)
 Target2 = const(2)
 Target3 = const(3)
-
+# antenna looping button option
 antenna_dir = {
     antennaA: ("Antenna A", 1),
     antennaB: ("Antenna B", 2),
     points: ("Points", 3),
 }
-
+# vehicle looping button
 vehicle_option_dir = {
     Subject: ("Subject", 1),
     Target1: ("Target 1", 2),
@@ -41,7 +41,7 @@ vehicle_option_dir = {
 }
 
 backlight.set(5000)
-
+# Global variables
 class GV:
     x_scale = ["6m"]
     y_scale = ["6m"]
@@ -60,24 +60,24 @@ class GV:
     rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(800)]
     antenna_b = []
 
-class ball_position:
+class ball_position: # ball position information 
 
     def __init__(self):
         self.mid_lat = 0
         self.mid_long = 0
         self.current_lat = 0
         self.current_long = 0
-        self.ball_pos_x = -50
+        self.ball_pos_x = -50 # draws the bal off screen
         self.ball_pos_y = -50
 
-    def mid_vals(self, mid_lat, mid_long):
+    def mid_vals(self, mid_lat, mid_long): # updates the mid point values
         self.mid_lat = mid_lat
         self.mid_long = mid_long
 
-    def update(self):
+    def update(self): # updates ball position position
         gui_list[8][0] = gui.DL_VERTEX2F(ball.ball_pos_x, ball.ball_pos_y)
 
-    def update_vals(self, ball_pos_x, ball_pos_y):
+    def update_vals(self, ball_pos_x, ball_pos_y): # moves the ball 
         self.ball_pos_x = ball_pos_x
         self.ball_pos_y = ball_pos_y
 
@@ -86,9 +86,9 @@ class Point:
 
     def __init__(self):
         self.y_m_list = []
-        self.stored_points_colour = [gui.DL_COLOR_RGB(0,0,0xFF)]
+        self.stored_points_colour = [gui.DL_COLOR_RGB(0,0,0xFF)] 
         self.antenna_colour = [gui.DL_COLOR_RGB(150, 0, 0)]
-        self.set_points =  [
+        self.set_points =  [    # creates empty list in gui_list
             [gui.DL_NOP()],
             [gui.DL_NOP()],
             [gui.DL_NOP()],
@@ -121,21 +121,21 @@ class Point:
         self.set_b = [
             [gui.DL_NOP()],
         ]
-        self.point_gui_list = [gui.SUBLIST,
+        self.point_gui_list = [gui.SUBLIST, # creates a point when set is pressed
                         self.stored_points_colour,
                         [gui.DL_POINT_SIZE(8)],
                         [gui.DL_BEGIN(gui.PRIM_POINTS)],
                         self.set_points,
                         [gui.DL_END()],
                         ]
-        self.antenna_a_gui = [gui.SUBLIST,
+        self.antenna_a_gui = [gui.SUBLIST, # creates antenna A point
                         self.antenna_colour,
                         [gui.DL_POINT_SIZE(10)],
                         [gui.DL_BEGIN(gui.PRIM_POINTS)],
                         self.set_a,
                         [gui.DL_END()],
                         ]
-        self.antenna_b_gui =  [gui.SUBLIST,
+        self.antenna_b_gui =  [gui.SUBLIST, # creates antenna B point
                         self.antenna_colour,
                         [gui.DL_POINT_SIZE(10)],
                         [gui.DL_BEGIN(gui.PRIM_POINTS)],
@@ -143,14 +143,14 @@ class Point:
                         [gui.DL_END()],
                         ]
     #TODO Get "A" and "B" in the middle
-    def set_contact_point(self, point, x, y):
+    def set_contact_point(self, point, x, y): # Sets contact point and fills the NOP position
         if 0 < point < (len(self.set_points)):
             self.set_points[point][0] = gui.DL_VERTEX2F(x, y)
             return True
         else:
             return False
 
-    def remove_contact_point(self, point):
+    def remove_contact_point(self, point): # removes contact point and replaces with NOP 
         if 0 < point < (len(self.set_points)):
             self.set_points[point][0] = gui.DL_NOP()
             return True
@@ -183,7 +183,7 @@ class Point:
 
 
 class Point_position:
-    def __init__(self):
+    def __init__(self): # class to obtain all relevant point parameters
         self.point_lat = self.point_lat
         self.point_long = self.point_long
         self.point_x_m = self.point_x_m
@@ -198,18 +198,14 @@ class Point_position:
         GV.point_list.pop(-1)
 
 
-def degE7_to_minE5(degE7):
-        return int((float(degE7) * 0.6) + (0.5 if degE7 >= 0.0 else -0.5))
-
-
-def position_calc():
+def position_calc(): # calculates the position of the ball on the screen
     global x_dist, y_dist
     if GV.a_set == False:
         pass
-    else:
-        x_dist = 400 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m)
-        y_dist = 420 / int(GV.y_scale[0].replace("m", "")) * (sample.y_m)
-        ball.update_vals(200 + x_dist, 270 + y_dist)
+    else: # converts meters and scale into a pixel position
+        x_dist = 400 / int(GV.x_scale[0].replace("m", "")) * (sample.x_m) # 400 is the number of pixels in the x direction
+        y_dist = 420 / int(GV.y_scale[0].replace("m", "")) * (sample.y_m) # 420 is the number of pixels in the y direction
+        ball.update_vals(200 + x_dist, 270 + y_dist) # updates ball values by adding the offsets to the centre of the graph
         ball.update()
 
 
@@ -222,15 +218,15 @@ def gnss_callback():
         if sample.sats_used > 3:
             GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
             GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-            if sample.fix_type > 1: #== vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
+            if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
                 if ball.mid_lat == 0 and ball.mid_long == 0:
                     ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
                     ball.update_vals(200, 270)
                     ball.update()
                 else:
                     position_calc()
-        # if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-        #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+            GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -367,7 +363,7 @@ def set_sats_status(state):
 
 def set_cp(l):
     global sample
-    if sample.fix_type > 1: # == vbox.VBOX_FIXTYPE_RTK_FIXED:
+    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
         if GV.a_set == True:
             if GV.set_button == "Points":
                 if len(GV.cp_list) < 24:
@@ -389,8 +385,8 @@ def set_cp(l):
                     point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
             else:
                 pass
-    # else: 
-    #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
+    else: 
+        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
 def delete_last_point(l):
@@ -426,8 +422,6 @@ def zoom_out(l):
             pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * float(GV.antenna_b[vals][0])) + 200
             pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * float(GV.antenna_b[vals][1])) + 270
             point.set_antenna_b(pixel_change_x, pixel_change_y)
-            # GV.antenna_b[vals][0] = pixel_change_x
-            # GV.antenna_b[vals][1] = pixel_change_y
     else:
         pass
 
@@ -448,10 +442,6 @@ def zoom_in(l):
             pixel_change_x = (400 / int(GV.x_scale[0].replace("m", "")) * float(GV.antenna_b[vals][0])) + 200
             pixel_change_y = (420 / int(GV.y_scale[0].replace("m", "")) * float(GV.antenna_b[vals][1])) + 270
             point.set_antenna_b(pixel_change_x, pixel_change_y)
-            # print(GV.antenna_b[vals][0])
-            # GV.antenna_b[vals][0] = pixel_change_x
-            # print(GV.antenna_b[vals][0])
-            # GV.antenna_b[vals][1] = pixel_change_y
     else:
         pass
 
