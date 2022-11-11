@@ -1,5 +1,5 @@
 coldstart button - beep
-set button - noise when set
+set button - noise when set and lights flash
 pop up when max cp set
 centre around average point
 zoom in and out at average point

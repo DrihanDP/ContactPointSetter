@@ -599,7 +599,7 @@ def main_screen(): # display list
         [gui.CTRL_FLATBUTTON, 425, 410, 75, 60, 30, '-', zoom_out],
         [gui.CTRL_FLATBUTTON, 425, 310, 160, 60, 30, 'Delete', delete_last_point],
         [gui.CTRL_FLATBUTTON, 425, 210, 160, 60, 30, 'Save', save],
-        [gui.DL_COLOR_RGB(200, 200, 200)],
+        [gui.DL_COLOR_RGB(100, 100, 100)],
         [gui.CTRL_FLATBUTTON, 620, 210, 160, 60, 30, 'Upload', upload_points],
     ])
     gui.show(gui_list)
