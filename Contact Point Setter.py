@@ -9,6 +9,7 @@ import backlight
 import gnss
 import vbox
 import ustruct as us
+import os
 
 # Constants
 RED = const(0xFF0000)
@@ -606,17 +607,15 @@ def main_screen(): # display list
 
 def main():
     global bank, antenna_or_cp_button, ball, point, subject_or_target
-    vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
-    vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
-    vbox.cfg_gnss({'DGPS Baudrate':115200}) # Set RTK Baud rate to 115200 - May need settings option in future
     antenna_or_cp_button = LoopingButton(620, 310, 160, 60, [x[0] for x in antenna_dir.values()], 30, set_antenna_or_cp)
     subject_or_target = LoopingButton(620, 110, 160, 60, [x[0] for x in vehicle_option_dir.values()], 30, vehicle_option)
     ball = ball_position()
     point = Point()
+    path = os.getcwd() + '/'
     bank = Image_Bank((
-        ('/icon-reset.png', 'Reset'),
-        ('/icons8-gnss-50.png', 'GNSS'),
-        ('/centre_icon.png', 'Centre')
+        (path + '/icon-reset.png', 'Reset'),
+        (path + '/icons8-gnss-50.png', 'GNSS'),
+        (path + '/centre_icon.png', 'Centre')
     ))
     init_buttons()
     main_screen()
@@ -632,5 +631,8 @@ def main():
     while vbox.samples_pending():
         _ = vbox.get_sample_hp()
     vbox.set_new_data_callback(gnss_callback)
+    vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
+    vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
+    vbox.cfg_gnss({'DGPS Baudrate':115200}) # Set RTK Baud rate to 115200 - May need settings option in future
 
 main()
