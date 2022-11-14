@@ -58,7 +58,8 @@ class GV:
     a_set = False
     point_list = []
     vehicle_option_str = "Subject"
-    rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(800)]
+    rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
+    reset_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
     antenna_b = []
 
 class ball_position: # ball position information 
@@ -274,7 +275,24 @@ def centre_graph_cb(l):
     pass
 
 
+def no_reset(l):
+    GV.reset_warning[0] = gui.DL_VERTEX_TRANSLATE_X(1000)
+
+
+def reset_screen(l):
+    GV.reset_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
+    
+
 def reset_cp(l): # completely resets all of the check points and antennas
+    vts.leds(0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    vts.delay_ms(500)
+    vts.leds(0, 20, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0)
+    vts.delay_ms(500)
+    vts.leds(0, 20, 0, 0, 20, 0, 0, 20, 0, 0, 0, 0)
+    vts.delay_ms(500)
+    vts.leds(0, 20, 0, 0, 20, 0, 0, 20, 0, 0, 20, 0)
+    vts.delay_ms(500)
+    vts.leds(* [0] * 12)
     for x in range(25):
         point.remove_contact_point(x)
     point.delete_antenna_a()
@@ -287,7 +305,7 @@ def reset_cp(l): # completely resets all of the check points and antennas
     GV.antenna_b = []
     ball.mid_vals(0, 0)
     GV.a_set = False
-
+    GV.reset_warning[0] = gui.DL_VERTEX_TRANSLATE_X(1000)
 
 def get_picture_button(name):
     try:
@@ -307,7 +325,7 @@ def create_buttons(*args): # creates picture buttons from imported picutres
     global buttons
     buttons = []
     if 'Reset' in args:
-        buttons.append(Picture_Button(700, -8, bank.get('Reset'), 'Reset', reset_cp))
+        buttons.append(Picture_Button(700, -8, bank.get('Reset'), 'Reset', reset_screen))
     if 'GNSS' in args:
         buttons.append(Picture_Button(10, 5, bank.get('GNSS'), 'GNSS', pass_cb))
     if 'Centre' in args:
@@ -377,16 +395,16 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     GV.cp_number[0] = str(len(GV.cp_list)) # updates number of contact points
                     point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y) # sets pixel x and y position
                     Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y) # gets relevant information for that point
-                    vts.leds(* [0, 90, 0] * 4)
-                    vts.delay_ms(50)
+                    vts.leds(* [0, 20, 0] * 4)
+                    vts.delay_ms(70)
                     vts.leds(* [0] * 12)
             elif GV.set_button == "Antenna B":
                 if len(GV.antennaBcoords) < 1:
                     GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
                     point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
                     GV.antenna_b = [(sample.x_m, sample.y_m)]
-                    vts.leds(* [0, 90, 0] * 4)
-                    vts.delay_ms(50)
+                    vts.leds(* [0, 20, 0] * 4)
+                    vts.delay_ms(70)
                     vts.leds(* [0] * 12)
         else:
             if GV.set_button == "Antenna A":
@@ -395,8 +413,8 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     GV.antennaAcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
                     vbox.set_basepoint()
                     point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
-                    vts.leds(* [0, 90, 0] * 4)
-                    vts.delay_ms(50)
+                    vts.leds(* [0, 20, 0] * 4)
+                    vts.delay_ms(70)
                     vts.leds(* [0] * 12)
             else:
                 pass
@@ -556,12 +574,7 @@ def main_screen(): # display list
         [gui.DL_POINT_SIZE(11)],
         [gui.DL_BEGIN(gui.PRIM_POINTS)],
         [gui.DL_VERTEX2F(ball.ball_pos_x, ball.ball_pos_y)],
-        [gui.DL_END()],
-        GV.rtk_warning,
-        # TODO move to back so that is appears on top of all the dots
-        [gui.DL_COLOR_RGB(255, 0, 0)],
-        [gui.CTRL_TEXT, 200, 220, 32, gui.OPT_CENTERX,'RTK Required'],
-        [gui.DL_VERTEX_TRANSLATE_X(0)],]
+        [gui.DL_END()],]
     gui_list.append(point.get_gui_list())
     gui_list.append(point.get_gui_a())
     gui_list.append(point.get_gui_b())
@@ -622,6 +635,25 @@ def main_screen(): # display list
         [gui.CTRL_FLATBUTTON, 425, 210, 160, 60, 30, 'Save', save],
         [gui.DL_COLOR_RGB(100, 100, 100)],
         [gui.CTRL_FLATBUTTON, 620, 210, 160, 60, 30, 'Upload', upload_points],
+        GV.rtk_warning,
+        [gui.DL_COLOR_RGB(255, 0, 0)],
+        [gui.CTRL_TEXT, 200, 220, 32, gui.OPT_CENTERX,'RTK Required'],
+        [gui.DL_VERTEX_TRANSLATE_X(0)],
+        GV.reset_warning,
+        [gui.DL_COLOR_A(230)],
+        [gui.DL_COLOR_RGB(255, 255, 255)],
+        [gui.PRIM_RECTS, [
+            [gui.DL_VERTEX2F(0, 0)],
+            [gui.DL_VERTEX2F(800, 480)],
+        ]],
+        [gui.DL_CLEAR_COLOR_A(0)],
+        [gui.DL_COLOR_RGB(255, 0, 0)],
+        [gui.CTRL_TEXT, 400, 120, 32, gui.OPT_CENTERX, 'Do you want to reset'],
+        [gui.CTRL_TEXT, 400, 170, 32, gui.OPT_CENTERX, 'your contact points?'],
+        [gui.DL_COLOR_RGB(255, 255, 255)],
+        [gui.CTRL_BUTTON, 230, 270, 160, 60, 30, 'Yes', reset_cp],
+        [gui.CTRL_BUTTON, 430, 270, 160, 60, 30, 'No', no_reset],
+        [gui.DL_VERTEX_TRANSLATE_X(0)],
     ])
     gui.show(gui_list)
 
