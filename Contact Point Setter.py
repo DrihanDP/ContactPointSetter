@@ -10,6 +10,7 @@ import gnss
 import vbox
 import ustruct as us
 import os
+import sounds
 
 # Constants
 RED = const(0xFF0000)
@@ -307,6 +308,7 @@ def reset_cp(l): # completely resets all of the check points and antennas
     GV.a_set = False
     GV.reset_warning[0] = gui.DL_VERTEX_TRANSLATE_X(1000)
 
+
 def get_picture_button(name):
     try:
         pb = next(pb for pb in buttons if pb.name == name)
@@ -429,22 +431,22 @@ def delete_last_point(l): # deletes the last point depending on the what is bein
             GV.cp_list.pop(-1)
             GV.cp_number[0] = str(int(GV.cp_number[0]) - 1)
             Point_position.delete_position(GV.point_list)
-            vts.leds(* [255, 100, 0] * 4)
-            vts.delay_ms(50)
+            vts.leds(* [20, 7, 0] * 4)
+            vts.delay_ms(70)
             vts.leds(* [0] * 12)
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) == 1:
             GV.antennaAcoords.pop(-1)
             point.delete_antenna_a()
-            vts.leds(* [255, 100, 0] * 4)
-            vts.delay_ms(50)
+            vts.leds(* [20, 7, 0] * 4)
+            vts.delay_ms(70)
             vts.leds(* [0] * 12)
     elif GV.set_button == "Antenna B":
         if len(GV.antennaBcoords) == 1:
             GV.antennaBcoords.pop(-1)
             point.delete_antenna_b()
-            vts.leds(* [255, 100, 0] * 4)
-            vts.delay_ms(50)
+            vts.leds(* [20, 7, 0] * 4)
+            vts.delay_ms(70)
             vts.leds(* [0] * 12)
 
 
@@ -649,7 +651,7 @@ def main_screen(): # display list
         [gui.DL_CLEAR_COLOR_A(0)],
         [gui.DL_COLOR_RGB(255, 0, 0)],
         [gui.CTRL_TEXT, 400, 120, 32, gui.OPT_CENTERX, 'Do you want to reset'],
-        [gui.CTRL_TEXT, 400, 170, 32, gui.OPT_CENTERX, 'your contact points?'],
+        [gui.CTRL_TEXT, 400, 170, 32, gui.OPT_CENTERX, 'all contact points?'],
         [gui.DL_COLOR_RGB(255, 255, 255)],
         [gui.CTRL_BUTTON, 230, 270, 160, 60, 30, 'Yes', reset_cp],
         [gui.CTRL_BUTTON, 430, 270, 160, 60, 30, 'No', no_reset],

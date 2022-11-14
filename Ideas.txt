@@ -1,8 +1,10 @@
 coldstart button - beep
-set button - noise when set
+set button - beep
+reset button - add beep
+make green dot a cross
+upload button to send the vbc file via serial to the VB3i 
+
+
 pop up when max cp set
 centre around average point
 zoom in and out at average point
-upload button to send the vbc file via serial to the VB3i 
-reset button - add beep
-make green dot a cross
