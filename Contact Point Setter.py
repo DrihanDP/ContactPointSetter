@@ -220,15 +220,15 @@ def gnss_callback():
         if sample.sats_used > 3:
             GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
             GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-            if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
+            if sample.fix_type > 1: #== vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
                 if ball.mid_lat == 0 and ball.mid_long == 0:
                     ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
                     ball.update_vals(200, 270)
                     ball.update()
                 else:
                     position_calc()
-        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-            GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+        # if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+        #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 
 def set_cp_number(btn):
@@ -261,6 +261,9 @@ def coldstart_cb(l):
     GV.long[0] = "000.00000"
     ball.update_vals(-50, -50)
     ball.update()
+    vts.leds(* [0, 0, 75] * 4)
+    vts.delay_ms(1000)
+    vts.leds(* [0, 0, 0] * 4)
 
 
 def pass_cb(l):
@@ -366,7 +369,7 @@ def set_sats_status(state): # sets satellite counter colour depending on fix typ
 
 def set_cp(l): # sets contact point when 'set' is pressed 
     global sample
-    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
+    if sample.fix_type > 1: # == vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
         if GV.a_set == True: # ensures antenna A is set first
             if GV.set_button == "Points":
                 if len(GV.cp_list) < 24:
@@ -374,11 +377,17 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     GV.cp_number[0] = str(len(GV.cp_list)) # updates number of contact points
                     point.set_contact_point((len(GV.cp_list)), ball.ball_pos_x, ball.ball_pos_y) # sets pixel x and y position
                     Point_position.get_point_position((sample.lat_degE7)/10000000, (sample.lng_degE7)/10000000, sample.x_m, sample.y_m, ball.ball_pos_x, ball.ball_pos_y) # gets relevant information for that point
+                    vts.leds(* [0, 90, 0] * 4)
+                    vts.delay_ms(50)
+                    vts.leds(* [0] * 12)
             elif GV.set_button == "Antenna B":
                 if len(GV.antennaBcoords) < 1:
                     GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
                     point.set_antenna_b(ball.ball_pos_x, ball.ball_pos_y)
                     GV.antenna_b = [(sample.x_m, sample.y_m)]
+                    vts.leds(* [0, 90, 0] * 4)
+                    vts.delay_ms(50)
+                    vts.leds(* [0] * 12)
         else:
             if GV.set_button == "Antenna A":
                 if len(GV.antennaAcoords) < 1:
@@ -386,10 +395,13 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     GV.antennaAcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
                     vbox.set_basepoint()
                     point.set_antenna_a(ball.ball_pos_x, ball.ball_pos_y)
+                    vts.leds(* [0, 90, 0] * 4)
+                    vts.delay_ms(50)
+                    vts.leds(* [0] * 12)
             else:
                 pass
-    else: 
-        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
+    # else: 
+    #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
 def delete_last_point(l): # deletes the last point depending on the what is being set
@@ -399,14 +411,23 @@ def delete_last_point(l): # deletes the last point depending on the what is bein
             GV.cp_list.pop(-1)
             GV.cp_number[0] = str(int(GV.cp_number[0]) - 1)
             Point_position.delete_position(GV.point_list)
+            vts.leds(* [255, 100, 0] * 4)
+            vts.delay_ms(50)
+            vts.leds(* [0] * 12)
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) == 1:
             GV.antennaAcoords.pop(-1)
             point.delete_antenna_a()
+            vts.leds(* [255, 100, 0] * 4)
+            vts.delay_ms(50)
+            vts.leds(* [0] * 12)
     elif GV.set_button == "Antenna B":
         if len(GV.antennaBcoords) == 1:
             GV.antennaBcoords.pop(-1)
             point.delete_antenna_b()
+            vts.leds(* [255, 100, 0] * 4)
+            vts.delay_ms(50)
+            vts.leds(* [0] * 12)
 
 
 def zoom_out(l): # zooms in around antenna A
@@ -586,7 +607,7 @@ def main_screen(): # display list
         [gui.CTRL_TEXT, 500, 170, 30, gui.OPT_CENTERX, 'Save to SD'],
         [gui.CTRL_TEXT, 700, 170, 30, gui.OPT_CENTERX, 'Serial upload'],
         [gui.CTRL_TEXT, 500, 70, 30, gui.OPT_CENTERX, 'Coldstart'],
-        [gui.CTRL_TEXT, 700, 70, 30, gui.OPT_CENTERX, 'Role'],
+        [gui.CTRL_TEXT, 700, 70, 30, gui.OPT_CENTERX, 'Submode'],
     ])
     gui_list.extend(button_options())
     gui_list.extend([
