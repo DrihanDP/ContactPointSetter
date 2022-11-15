@@ -64,14 +64,14 @@ class GV:
     antenna_b = []
 
 
-class ball_position: # ball position information 
+class ball_position: # x position information 
 
     def __init__(self):
         self.mid_lat = 0
         self.mid_long = 0
         self.current_lat = 0
         self.current_long = 0
-        self.ball_pos_x = -50 # draws the bal off screen
+        self.ball_pos_x = -50 # draws the ball off screen
         self.ball_pos_y = -50
 
     def mid_vals(self, mid_lat, mid_long): # updates the mid point values
@@ -79,7 +79,10 @@ class ball_position: # ball position information
         self.mid_long = mid_long
 
     def update(self): # updates ball position position
-        gui_list[8][0] = gui.DL_VERTEX2F(ball.ball_pos_x, ball.ball_pos_y)
+        gui_list[8][0] = gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y - 8)
+        gui_list[9][0] = gui.DL_VERTEX2F(ball.ball_pos_x + 6, ball.ball_pos_y + 8)
+        gui_list[13][0] = gui.DL_VERTEX2F(ball.ball_pos_x + 6, ball.ball_pos_y - 8)
+        gui_list[14][0] = gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y + 8)
 
     def update_vals(self, ball_pos_x, ball_pos_y): # moves the ball 
         self.ball_pos_x = ball_pos_x
@@ -422,7 +425,7 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     vts.leds(* [0, 20, 0] * 4)
                     vts.delay_ms(70)
                     vts.leds(* [0] * 12)
-                    speaker.play_sound(4)
+                    # speaker.play_sound(4)
             else:
                 pass
     # else: 
@@ -577,11 +580,18 @@ def main_screen(): # display list
         [gui.DL_CLEAR_COLOR_RGB(255, 255, 255)],
         [gui.DL_SCISSOR_SIZE(400, 420)],
         [gui.DL_SCISSOR_XY(0, 61)],
-        [gui.DL_COLOR_RGB(0, 102, 17)],
-        [gui.DL_POINT_SIZE(11)],
-        [gui.DL_BEGIN(gui.PRIM_POINTS)],
-        [gui.DL_VERTEX2F(ball.ball_pos_x, ball.ball_pos_y)],
-        [gui.DL_END()],]
+        [gui.DL_COLOR_RGB(0, 0, 0)],
+        [gui.DL_LINE_WIDTH(1.5)],
+        [gui.DL_BEGIN(gui.PRIM_LINE_STRIP)],
+        [gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y - 8)],
+        [gui.DL_VERTEX2F(ball.ball_pos_x + 6, ball.ball_pos_y + 8)],
+        [gui.DL_END()],
+        [gui.DL_LINE_WIDTH(1.5)],
+        [gui.DL_BEGIN(gui.PRIM_LINE_STRIP)],
+        [gui.DL_VERTEX2F(ball.ball_pos_x + 6, ball.ball_pos_y - 8)],
+        [gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y + 8)],
+        [gui.DL_END()],
+        ] 
     gui_list.append(point.get_gui_list())
     gui_list.append(point.get_gui_a())
     gui_list.append(point.get_gui_b())
