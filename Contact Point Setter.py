@@ -10,7 +10,7 @@ import gnss
 import vbox
 import ustruct as us
 import os
-import sounds
+from sounds import Speaker
 
 # Constants
 RED = const(0xFF0000)
@@ -45,8 +45,8 @@ vehicle_option_dir = {
 backlight.set(5000)
 # Global variables
 class GV:
-    x_scale = ["6m"]
-    y_scale = ["6m"]
+    x_scale = ["10m"]
+    y_scale = ["10m"]
     sats_colour = [gui.DL_COLOR(RED)]
     sats = ["0"]
     lat = ["000.00000"]
@@ -62,6 +62,7 @@ class GV:
     rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
     reset_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
     antenna_b = []
+
 
 class ball_position: # ball position information 
 
@@ -259,6 +260,7 @@ def set_antenna_or_cp(btn):
 
 def coldstart_cb(l):
     gnss.command(b'\xb5\x62\x06\x04\x04\x00\xff\xff\x02\x00\x0e\x61')
+    speaker.play_sound(2)
     GV.lat[0] = "000.00000"
     GV.long[0] = "000.00000"
     ball.update_vals(-50, -50)
@@ -306,6 +308,8 @@ def reset_cp(l): # completely resets all of the check points and antennas
     GV.antenna_b = []
     ball.mid_vals(0, 0)
     GV.a_set = False
+    speaker.play_sound(2)
+    vts.delay_ms(1000)
     GV.reset_warning[0] = gui.DL_VERTEX_TRANSLATE_X(1000)
 
 
@@ -418,6 +422,7 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     vts.leds(* [0, 20, 0] * 4)
                     vts.delay_ms(70)
                     vts.leds(* [0] * 12)
+                    speaker.play_sound(4)
             else:
                 pass
     # else: 
@@ -661,11 +666,12 @@ def main_screen(): # display list
 
 
 def main():
-    global bank, antenna_or_cp_button, ball, point, subject_or_target
+    global bank, antenna_or_cp_button, ball, point, subject_or_target, speaker
     antenna_or_cp_button = LoopingButton(620, 310, 160, 60, [x[0] for x in antenna_dir.values()], 30, set_antenna_or_cp)
     subject_or_target = LoopingButton(620, 110, 160, 60, [x[0] for x in vehicle_option_dir.values()], 30, vehicle_option)
     ball = ball_position()
     point = Point()
+    speaker = Speaker(255)
     path = os.getcwd() + '/'
     bank = Image_Bank((
         (path + '/icon-reset.png', 'Reset'),

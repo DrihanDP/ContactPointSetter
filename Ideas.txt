@@ -1,6 +1,5 @@
-coldstart button - beep
 set button - beep
-reset button - add beep
+delete button = beep
 make green dot a cross
 upload button to send the vbc file via serial to the VB3i 
 
