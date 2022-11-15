@@ -425,7 +425,7 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     vts.leds(* [0, 20, 0] * 4)
                     vts.delay_ms(70)
                     vts.leds(* [0] * 12)
-                    # speaker.play_sound(4)
+                    speaker.play_sound(4)
             else:
                 pass
     # else: 

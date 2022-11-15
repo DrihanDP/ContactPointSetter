@@ -1,8 +1,6 @@
 set button - beep
-delete button = beep
-make green dot a cross
+delete button - beep
 upload button to send the vbc file via serial to the VB3i 
-
 
 pop up when max cp set
 centre around average point
