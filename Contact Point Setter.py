@@ -407,6 +407,7 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     vts.leds(* [0, 20, 0] * 4)
                     vts.delay_ms(70)
                     vts.leds(* [0] * 12)
+                    speaker.play_sound(4)
             elif GV.set_button == "Antenna B":
                 if len(GV.antennaBcoords) < 1:
                     GV.antennaBcoords.append((math.radians((sample.lat_degE7)/10000000), math.radians((sample.lng_degE7)/10000000), sample.alt_msl_m))
@@ -415,6 +416,7 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     vts.leds(* [0, 20, 0] * 4)
                     vts.delay_ms(70)
                     vts.leds(* [0] * 12)
+                    speaker.play_sound(4)
         else:
             if GV.set_button == "Antenna A":
                 if len(GV.antennaAcoords) < 1:
@@ -429,6 +431,7 @@ def set_cp(l): # sets contact point when 'set' is pressed
             else:
                 pass
     # else: 
+        # speaker.play_sound(1)
     #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
@@ -442,6 +445,7 @@ def delete_last_point(l): # deletes the last point depending on the what is bein
             vts.leds(* [20, 7, 0] * 4)
             vts.delay_ms(70)
             vts.leds(* [0] * 12)
+            speaker.play_sound(3)
     elif GV.set_button == "Antenna A":
         if len(GV.antennaAcoords) == 1:
             GV.antennaAcoords.pop(-1)
@@ -449,6 +453,7 @@ def delete_last_point(l): # deletes the last point depending on the what is bein
             vts.leds(* [20, 7, 0] * 4)
             vts.delay_ms(70)
             vts.leds(* [0] * 12)
+            speaker.play_sound(3)
     elif GV.set_button == "Antenna B":
         if len(GV.antennaBcoords) == 1:
             GV.antennaBcoords.pop(-1)
@@ -456,6 +461,7 @@ def delete_last_point(l): # deletes the last point depending on the what is bein
             vts.leds(* [20, 7, 0] * 4)
             vts.delay_ms(70)
             vts.leds(* [0] * 12)
+            speaker.play_sound(3)
 
 
 def zoom_out(l): # zooms in around antenna A
@@ -555,9 +561,14 @@ def save(l):
             f.write(us.pack('>f', -6500000.00))
             f.write(us.pack('>f', -1.0))
         f.close()
+        # TODO Make happy sound
+        speaker.play_sound(0)
+    else:
+        speaker.play_sound(1)
 
 
 def upload_points(l):
+    # page 23 on word doc
     pass
 
 

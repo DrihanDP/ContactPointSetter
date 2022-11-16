@@ -1,7 +1,6 @@
-set button - beep
-delete button - beep
 upload button to send the vbc file via serial to the VB3i 
 
+add generator for reset screen
 pop up when max cp set
 centre around average point
 zoom in and out at average point
