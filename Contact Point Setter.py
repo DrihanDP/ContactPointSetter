@@ -11,6 +11,7 @@ import vbox
 import ustruct as us
 import os
 from sounds import Speaker
+import serial
 
 # Constants
 RED = const(0xFF0000)
@@ -235,6 +236,11 @@ def gnss_callback():
                     position_calc()
         # if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
         #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+
+
+def serial_callback():
+    msgIn = serial.read(serial.available())
+    print(msgIn)
 
 
 def set_cp_number(btn):
@@ -569,6 +575,10 @@ def save(l):
 
 def upload_points(l):
     # page 23 on word doc
+    # get_seed = [b"0x12", b"0x04", b"0x25", b"0x95"]
+    #"\x12\x04\x25\x95"
+    serial.write(b"\x12\x04\x25\x95")
+    serial_callback()
     pass
 
 
@@ -712,6 +722,8 @@ def main():
             print(e)
     while vbox.samples_pending():
         _ = vbox.get_sample_hp()
+    serial.open(115200)
+    serial.set_callback(serial_callback)
     vbox.set_new_data_callback(gnss_callback)
     vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
     vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
