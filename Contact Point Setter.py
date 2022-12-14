@@ -227,15 +227,15 @@ def gnss_callback():
         if sample.sats_used > 3:
             GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
             GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-            if sample.fix_type > 1: #== vbox.VBOX_FIXTYPE_RTK_FIXED: #TODO change to rtk fix
+            if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
                 if ball.mid_lat == 0 and ball.mid_long == 0:
                     ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
                     ball.update_vals(200, 270)
                     ball.update()
                 else:
                     position_calc()
-        # if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-        #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+            GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 
 def serial_callback():
@@ -402,7 +402,7 @@ def set_sats_status(state): # sets satellite counter colour depending on fix typ
 
 def set_cp(l): # sets contact point when 'set' is pressed 
     global sample
-    if sample.fix_type > 1: # == vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
+    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
         if GV.a_set == True: # ensures antenna A is set first
             if GV.set_button == "Points":
                 if len(GV.cp_list) < 24:
@@ -436,9 +436,9 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     speaker.play_sound(4)
             else:
                 pass
-    # else: 
-        # speaker.play_sound(1)
-    #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
+    else: 
+        speaker.play_sound(1)
+        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
 def delete_last_point(l): # deletes the last point depending on the what is being set
