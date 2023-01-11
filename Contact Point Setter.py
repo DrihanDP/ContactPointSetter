@@ -239,6 +239,7 @@ def gnss_callback():
 
 
 def serial_callback():
+    vts.delay_ms(500)
     msgIn = serial.read(serial.available())
     print(msgIn)
 
@@ -579,7 +580,6 @@ def upload_points(l):
     #"\x12\x04\x25\x95"
     serial.write(b"\x12\x04\x25\x95")
     serial_callback()
-    pass
 
 
 def redraw_cb(b):
