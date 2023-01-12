@@ -206,6 +206,11 @@ class Point_position:
         GV.point_list.pop(-1)
 
 
+class Commands:
+    get_seed = b"\x12\x04\x25\x95"
+    set_quiet = b"\x07\x06\02\xFF\x9b\x1f"
+    restart_stream = b"\x07\x06\02\x00\x85\xef"
+
 def position_calc(): # calculates the position of the ball on the screen
     global x_dist, y_dist
     if GV.a_set == False:
@@ -238,11 +243,31 @@ def gnss_callback():
             GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 
+def create_checksum(msg):
+    Polynomial = 0x45DC
+    CRC = 0
+    for byte in range(len(msg)):
+        CRC = CRC ^ (msg[byte] << 8)
+        CRC = CRC % 0x010000
+        for _ in range(8):
+            if ((CRC & 0x8000) == 0x8000):
+                CRC = CRC << 1
+                CRC = CRC ^ Polynomial
+            else:
+                CRC = CRC << 1
+        CRC = CRC % 0x010000
+    # return ((CRC >> 8) & 0xFF), (CRC & 0xFF) # Returns as two seperate bytes
+    return CRC # Returns as one 16bit integer
+
+
 def serial_callback():
     vts.delay_ms(500)
     msgIn = serial.read(serial.available())
     print(msgIn)
-
+    if msgIn[0:2] == b'\xff\x01':
+        crc_int = create_checksum(msgIn[2:4])
+        crc_btyes = crc_int.to_bytes(2, 'big')
+        print(vbox.rlcrc(4, crc_btyes))
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -575,10 +600,9 @@ def save(l):
 
 
 def upload_points(l):
-    # page 23 on word doc
-    # get_seed = [b"0x12", b"0x04", b"0x25", b"0x95"]
-    #"\x12\x04\x25\x95"
-    serial.write(b"\x12\x04\x25\x95")
+    serial.write(Commands.set_quiet)
+    vts.delay_ms(50)
+    serial.write(Commands.get_seed)
     serial_callback()
 
 
@@ -725,8 +749,8 @@ def main():
     serial.open(115200)
     serial.set_callback(serial_callback)
     vbox.set_new_data_callback(gnss_callback)
-    vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
-    vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
-    vbox.cfg_gnss({'DGPS Baudrate':115200}) # Set RTK Baud rate to 115200 - May need settings option in future
+    # vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
+    # vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
+    # vbox.cfg_gnss({'DGPS Baudrate':115200}) # Set RTK Baud rate to 115200 - May need settings option in future
 
 main()
