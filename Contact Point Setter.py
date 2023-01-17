@@ -261,13 +261,18 @@ def create_checksum(msg):
 
 
 def serial_callback():
-    vts.delay_ms(500)
+    vts.delay_ms(100)
     msgIn = serial.read(serial.available())
-    print(msgIn)
     if msgIn[0:2] == b'\xff\x01':
-        crc_int = create_checksum(msgIn[2:4])
-        crc_btyes = crc_int.to_bytes(2, 'big')
-        print(vbox.rlcrc(4, crc_btyes))
+        new_message = b'\xFF\x01\x12\x34\x6F\x55'
+        crc_int = create_checksum(new_message[2:4])
+        crc_bytes = crc_int.to_bytes(2, 'big')
+        unlock_without_crc = b'\x13\x06' + crc_bytes + bytearray(2)
+        unlock_bytearray = bytearray(unlock_without_crc)
+        print(bytes(unlock_bytearray))
+        vbox.rlcrc(unlock_bytearray, 4)
+        print(bytes(unlock_bytearray))
+        # serial.write(bytes(unlock_bytearray))
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
