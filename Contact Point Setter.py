@@ -209,8 +209,13 @@ class Point_position:
 class Commands:
     get_seed = b"\x12\x04\x25\x95"
     set_quiet = b"\x07\x06\02\xFF\x9b\x1f"
+    set_noise = b"\x07\x06\x02\x00\x85\xef"
     restart_stream = b"\x07\x06\02\x00\x85\xef"
+    upload = b'\x04\x08\x00\x1d\xa8\x04\xd1\xed' 
+    # b'\x04\x08\x00\x1d\xa8\x04\xd1\xed' # 4 bytes for adas mode
+    # b''
 
+    
 def position_calc(): # calculates the position of the ball on the screen
     global x_dist, y_dist
     if GV.a_set == False:
@@ -263,16 +268,16 @@ def create_checksum(msg):
 def serial_callback():
     vts.delay_ms(100)
     msgIn = serial.read(serial.available())
-    if msgIn[0:2] == b'\xff\x01':
-        new_message = b'\xFF\x01\x12\x34\x6F\x55'
-        crc_int = create_checksum(new_message[2:4])
+    if msgIn[0:2] == b'\xff\x01' and len(msgIn) == 6:
+        crc_int = create_checksum(msgIn[2:4])
         crc_bytes = crc_int.to_bytes(2, 'big')
         unlock_without_crc = b'\x13\x06' + crc_bytes + bytearray(2)
         unlock_bytearray = bytearray(unlock_without_crc)
-        print(bytes(unlock_bytearray))
         vbox.rlcrc(unlock_bytearray, 4)
-        print(bytes(unlock_bytearray))
-        # serial.write(bytes(unlock_bytearray))
+        serial.write(bytes(unlock_bytearray))
+    elif len(msgIn) >= 8:
+        print(msgIn)
+
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -605,10 +610,16 @@ def save(l):
 
 
 def upload_points(l):
+    print("set quiet")
     serial.write(Commands.set_quiet)
-    vts.delay_ms(50)
+    serial_callback()
+    print("get seed")
     serial.write(Commands.get_seed)
     serial_callback()
+    print("upload")
+    serial.write(bytes(Commands.upload))
+    serial_callback()
+    # serial.write(Commands.set_noise)
 
 
 def redraw_cb(b):
