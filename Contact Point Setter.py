@@ -211,9 +211,23 @@ class Commands:
     set_quiet = b"\x07\x06\02\xFF\x9b\x1f"
     set_noise = b"\x07\x06\x02\x00\x85\xef"
     restart_stream = b"\x07\x06\02\x00\x85\xef"
-    upload = b'\x04\x08\x00\x1d\xa8\x04\xd1\xed' 
+    upload = b'\x04\x08\x00\x1C\xF8\x80\x27\x9c'
+    # b'\x04\x08\x00\x00\x01\x00\x37\xbd' # all 256 bytes
+    # b"\x04\x08\x00\x00\x01\x01\x27\x9c" # one byte?
     # b'\x04\x08\x00\x1d\xa8\x04\xd1\xed' # 4 bytes for adas mode
-    # b''
+    # b'\x04\x08\x00\x10\xb8\x00\xce\xbb' # start address in v3 (4280) for 256 bytes
+    # b'\x04\x08\x00\x17\x18\x30\x7E\xf6' # SubjectContactPoint (5912) for 48 bytes
+    # b'\x04\x08\x00\x17\x48\x00\x46\x1a' # SubjectVehicleShape 1 (5960) for 256 bytes
+    # b'\x04\x08\x00\x18\x48\x80\xfb\xa3' # SubjectVehicleShape 2 (6216) for 128 bytes
+    # b'\x04\x08\x00\x18\xc8\x10\x63\x82' # Target1ContactPoint (6344) for 16 bytes
+    # b'\x04\x08\x00\x18\xd8\x00\x72\xc0' # Target1VehicleShape 1 (6360) for 256 bytes
+    # b'\x04\x08\x00\x19\x58\x80\xcf\xe0' # Target1VehicleShape 2 (6488) for 128 bytes
+    # b'\x04\x08\x00\x1a\x58\x10\x15\x74' # Target2ContactPoint (6744) for 16 bytes
+    # b'\x04\x08\x00\x1a\x68\x00\x02\xad' # Target2VehicleShape 1 (6760) for 256 bytes
+    # b'\x04\x08\x00\x1b\x68\x80\xa4\x15' # Target2VehicleShape 2 (7016) for 128 bytes
+    # b'\x04\x08\x00\x1b\xe8\x10\x3C\x34' # Target3ContactPoint (7144) for 16 bytes
+    # b'\x04\x08\x00\x1b\xf8\x00\x2D\x76' # Target3VehicleShape 1 (7160) for 256 bytes
+    # b'\x04\x08\x00\x1c\xf8\x80\x39\x6E' # Target3VehicleShape 2 (7416) for 128 bytes
 
     
 def position_calc(): # calculates the position of the ball on the screen
