@@ -44,6 +44,20 @@ vehicle_option_dir = {
 }
 
 backlight.set(5000)
+
+SubjectContactPoint = bytearray(48)
+SubjectVehicleShape_0 = bytearray(256)
+SubjectVehicleShape_1 = bytearray(128)
+Target1ContactPoint = bytearray(16)
+Target1VehicleShape_0 = bytearray(256)
+Target1VehicleShape_1 = bytearray(128)
+Target2ContactPoint = bytearray(16)
+Target2VehicleShape_0 = bytearray(256)
+Target2VehicleShape_1 = bytearray(128)
+Target3ContactPoint = bytearray(16)
+Target3VehicleShape_0 = bytearray(256)
+Target3VehicleShape_1 = bytearray(128)
+
 # Global variables
 class GV:
     x_scale = ["10m"]
@@ -211,7 +225,7 @@ class Commands:
     set_quiet = b"\x07\x06\02\xFF\x9b\x1f"
     set_noise = b"\x07\x06\x02\x00\x85\xef"
     restart_stream = b"\x07\x06\02\x00\x85\xef"
-    upload = b'\x04\x08\x00\x1C\xF8\x80\x27\x9c'
+    upload = b'\x04\x08\x00\x17\x48\x00\x46\x1a'
     # b'\x04\x08\x00\x00\x01\x00\x37\xbd' # all 256 bytes
     # b"\x04\x08\x00\x00\x01\x01\x27\x9c" # one byte?
     # b'\x04\x08\x00\x1d\xa8\x04\xd1\xed' # 4 bytes for adas mode
@@ -289,8 +303,10 @@ def serial_callback():
         unlock_bytearray = bytearray(unlock_without_crc)
         vbox.rlcrc(unlock_bytearray, 4)
         serial.write(bytes(unlock_bytearray))
-    elif len(msgIn) >= 8:
-        print(msgIn)
+    # elif b'\xff\x01\x13\xde\xff\x01' in msgIn[0:6]:
+    #     print(msgIn[6:])
+    else:
+        print(msgIn[6:])
 
 
 def set_cp_number(btn):
