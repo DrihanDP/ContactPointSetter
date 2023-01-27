@@ -58,6 +58,8 @@ Target3ContactPoint = bytearray(16)
 Target3VehicleShape_0 = bytearray(256)
 Target3VehicleShape_1 = bytearray(128)
 
+uploaded = 0
+
 # Global variables
 class GV:
     x_scale = ["10m"]
@@ -225,7 +227,18 @@ class Commands:
     set_quiet = b"\x07\x06\02\xFF\x9b\x1f"
     set_noise = b"\x07\x06\x02\x00\x85\xef"
     restart_stream = b"\x07\x06\02\x00\x85\xef"
-    upload = b'\x04\x08\x00\x17\x48\x00\x46\x1a'
+    upload = b'\x04\x08\x00\x17\x18\x30\x7E\xf6'
+    upload1 = b'\x04\x08\x00\x17\x48\x00\x46\x1a'
+    upload2 = b'\x04\x08\x00\x18\x48\x80\xfb\xa3'
+    upload3 = b'\x04\x08\x00\x18\xc8\x10\x63\x82'
+    upload4 = b'\x04\x08\x00\x18\xd8\x00\x72\xc0'
+    upload5 = b'\x04\x08\x00\x19\x58\x80\xcf\xe0'
+    upload6 = b'\x04\x08\x00\x1a\x58\x10\x15\x74'
+    upload7 = b'\x04\x08\x00\x1a\x68\x00\x02\xad'
+    upload8 = b'\x04\x08\x00\x1b\x68\x80\xa4\x15'
+    upload9 = b'\x04\x08\x00\x1b\xe8\x10\x3C\x34'
+    upload10 = b'\x04\x08\x00\x1b\xf8\x00\x2D\x76'
+    upload11 = b'\x04\x08\x00\x1c\xf8\x80\x39\x6E'
     # b'\x04\x08\x00\x00\x01\x00\x37\xbd' # all 256 bytes
     # b"\x04\x08\x00\x00\x01\x01\x27\x9c" # one byte?
     # b'\x04\x08\x00\x1d\xa8\x04\xd1\xed' # 4 bytes for adas mode
@@ -306,7 +319,12 @@ def serial_callback():
     # elif b'\xff\x01\x13\xde\xff\x01' in msgIn[0:6]:
     #     print(msgIn[6:])
     else:
-        print(msgIn[6:])
+        print(msgIn[6:len(msgIn) - 2])
+        if vts.sd_present() == True:
+            f.write(bytes(msgIn[6:len(msgIn) - 2]))
+            if uploaded == 11:
+                f.close()
+            
 
 
 def set_cp_number(btn):
@@ -640,6 +658,8 @@ def save(l):
 
 
 def upload_points(l):
+    global uploaded, f
+    f = open("read_file", 'wb')
     print("set quiet")
     serial.write(Commands.set_quiet)
     serial_callback()
@@ -649,6 +669,31 @@ def upload_points(l):
     print("upload")
     serial.write(bytes(Commands.upload))
     serial_callback()
+    serial.write(bytes(Commands.upload1))
+    serial_callback()
+    serial.write(bytes(Commands.upload2))
+    serial_callback()
+    serial.write(bytes(Commands.upload3))
+    serial_callback()
+    serial.write(bytes(Commands.upload4))
+    serial_callback()
+    serial.write(bytes(Commands.upload5))
+    serial_callback()
+    serial.write(bytes(Commands.upload6))
+    serial_callback()
+    serial.write(bytes(Commands.upload7))
+    serial_callback()
+    serial.write(bytes(Commands.upload8))
+    serial_callback()
+    serial.write(bytes(Commands.upload9))
+    serial_callback()
+    serial.write(bytes(Commands.upload10))
+    serial_callback()
+    serial.write(bytes(Commands.upload11))
+    uploaded = 11
+    serial_callback()
+    
+
     # serial.write(Commands.set_noise)
 
 
