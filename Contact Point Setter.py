@@ -45,16 +45,16 @@ vehicle_option_dir = {
 
 backlight.set(5000)
 
-SubjectContactPoint = bytearray(48)
+# SubjectContactPoint = bytearray(48)
 SubjectVehicleShape_0 = bytearray(256)
 SubjectVehicleShape_1 = bytearray(128)
-Target1ContactPoint = bytearray(16)
+# Target1ContactPoint = bytearray(16)
 Target1VehicleShape_0 = bytearray(256)
 Target1VehicleShape_1 = bytearray(128)
-Target2ContactPoint = bytearray(16)
+# Target2ContactPoint = bytearray(16)
 Target2VehicleShape_0 = bytearray(256)
 Target2VehicleShape_1 = bytearray(128)
-Target3ContactPoint = bytearray(16)
+# Target3ContactPoint = bytearray(16)
 Target3VehicleShape_0 = bytearray(256)
 Target3VehicleShape_1 = bytearray(128)
 
@@ -226,7 +226,8 @@ class Commands:
     get_seed = b"\x12\x04\x25\x95"
     set_quiet = b"\x07\x06\02\xFF\x9b\x1f"
     set_noise = b"\x07\x06\x02\x00\x85\xef"
-    restart_stream = b"\x07\x06\02\x00\x85\xef"
+    restart_stream = b"\x07\x06\x02\x00\x85\xef"
+    adas_start = b'\x04\x08\x00\x10\xb8\x00\xd0\x4b'
     upload = b'\x04\x08\x00\x17\x18\x30\x7E\xf6'
     upload1 = b'\x04\x08\x00\x17\x48\x00\x46\x1a'
     upload2 = b'\x04\x08\x00\x18\x48\x80\xfb\xa3'
@@ -239,6 +240,7 @@ class Commands:
     upload9 = b'\x04\x08\x00\x1b\xe8\x10\x3C\x34'
     upload10 = b'\x04\x08\x00\x1b\xf8\x00\x2D\x76'
     upload11 = b'\x04\x08\x00\x1c\xf8\x80\x39\x6E'
+    upload4k = b'\x2d\x08\x00\x00\x10\xb8\x5c\xc6'
     # b'\x04\x08\x00\x00\x01\x00\x37\xbd' # all 256 bytes
     # b"\x04\x08\x00\x00\x01\x01\x27\x9c" # one byte?
     # b'\x04\x08\x00\x1d\xa8\x04\xd1\xed' # 4 bytes for adas mode
@@ -278,15 +280,15 @@ def gnss_callback():
         if sample.sats_used > 3:
             GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
             GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-            if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+            if sample.fix_type > 1: # == vbox.VBOX_FIXTYPE_RTK_FIXED:
                 if ball.mid_lat == 0 and ball.mid_long == 0:
                     ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
                     ball.update_vals(200, 270)
                     ball.update()
                 else:
                     position_calc()
-        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-            GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+        # if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+        #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 
 def create_checksum(msg):
@@ -309,6 +311,7 @@ def create_checksum(msg):
 def serial_callback():
     vts.delay_ms(100)
     msgIn = serial.read(serial.available())
+    print(msgIn)
     if msgIn[0:2] == b'\xff\x01' and len(msgIn) == 6:
         crc_int = create_checksum(msgIn[2:4])
         crc_bytes = crc_int.to_bytes(2, 'big')
@@ -316,16 +319,35 @@ def serial_callback():
         unlock_bytearray = bytearray(unlock_without_crc)
         vbox.rlcrc(unlock_bytearray, 4)
         serial.write(bytes(unlock_bytearray))
-    # elif b'\xff\x01\x13\xde\xff\x01' in msgIn[0:6]:
-    #     print(msgIn[6:])
     else:
-        print(msgIn[6:len(msgIn) - 2])
-        if vts.sd_present() == True:
-            f.write(bytes(msgIn[6:len(msgIn) - 2]))
-            if uploaded == 11:
-                f.close()
+        print(msgIn[3:len(msgIn) - 2])
+        print()
+        # if vts.sd_present() == True:
+        #     if uploaded == 1:
+        #         f.write(b'SubConPoint')
+        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
+        #     if uploaded == 2:
+        #         f.write(b'SubShape')
+        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
+        #     if uploaded == 3:
+        #         f.write(b'SubShape')
+        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
+        #         f.close()
+        # if '\x13\xde\xff\x01' in msgIn:
+        #     if vts.sd_present() == True:
+        #         f.write(bytes(msgIn[6:len(msgIn) - 2]))
+        #         print(bytes(msgIn[6:len(msgIn) - 2]))
+        #         print()
+        #     if uploaded == 11:
+        #         f.close()
+        # else:
+        #     if vts.sd_present() == True:
+        #         f.write(bytes(msgIn[2:len(msgIn) - 2]))
+        #         print(bytes(msgIn[2:len(msgIn) - 2]))
+        #         print()
+        #     if uploaded == 11:
+        #         f.close()
             
-
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -486,7 +508,7 @@ def set_sats_status(state): # sets satellite counter colour depending on fix typ
 
 def set_cp(l): # sets contact point when 'set' is pressed 
     global sample
-    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
+    if sample.fix_type > 1: #== vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
         if GV.a_set == True: # ensures antenna A is set first
             if GV.set_button == "Points":
                 if len(GV.cp_list) < 24:
@@ -520,9 +542,9 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     speaker.play_sound(4)
             else:
                 pass
-    else: 
-        speaker.play_sound(1)
-        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
+    # else: 
+    #     speaker.play_sound(1)
+    #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
 def delete_last_point(l): # deletes the last point depending on the what is being set
@@ -640,6 +662,9 @@ def save(l):
                 f.write(us.pack('>d', i))
         for vals in GV.cp_list:
             for i in vals:
+                print("CP")
+                print(i)
+                print(us.pack('>d', i))
                 f.write(us.pack('>d', i))
         for i in range(24 - len(GV.cp_list)):
             f.write(us.pack('>f', -6500000.00))
@@ -666,35 +691,22 @@ def upload_points(l):
     print("get seed")
     serial.write(Commands.get_seed)
     serial_callback()
-    print("upload")
-    serial.write(bytes(Commands.upload))
     serial_callback()
-    serial.write(bytes(Commands.upload1))
+    print("start")
+    serial.write(Commands.adas_start)
     serial_callback()
-    serial.write(bytes(Commands.upload2))
-    serial_callback()
-    serial.write(bytes(Commands.upload3))
-    serial_callback()
-    serial.write(bytes(Commands.upload4))
-    serial_callback()
-    serial.write(bytes(Commands.upload5))
-    serial_callback()
-    serial.write(bytes(Commands.upload6))
-    serial_callback()
-    serial.write(bytes(Commands.upload7))
-    serial_callback()
-    serial.write(bytes(Commands.upload8))
-    serial_callback()
-    serial.write(bytes(Commands.upload9))
-    serial_callback()
-    serial.write(bytes(Commands.upload10))
-    serial_callback()
-    serial.write(bytes(Commands.upload11))
-    uploaded = 11
-    serial_callback()
-    
-
-    # serial.write(Commands.set_noise)
+    # print("upload - SubjectContactPoint")
+    # uploaded = 1
+    # serial.write(bytes(Commands.upload))
+    # serial_callback()
+    # print("upload1")
+    # uploaded = 2
+    # serial.write(bytes(Commands.upload1))
+    # serial_callback()
+    # print("upload2")
+    # uploaded = 3
+    # serial.write(bytes(Commands.upload2))
+    # serial_callback()
 
 
 def redraw_cb(b):
