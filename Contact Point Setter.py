@@ -240,7 +240,6 @@ class Commands:
     upload9 = b'\x04\x08\x00\x1b\xe8\x10\x3C\x34'
     upload10 = b'\x04\x08\x00\x1b\xf8\x00\x2D\x76'
     upload11 = b'\x04\x08\x00\x1c\xf8\x80\x39\x6E'
-    upload4k = b'\x2d\x08\x00\x00\x10\xb8\x5c\xc6'
     # b'\x04\x08\x00\x00\x01\x00\x37\xbd' # all 256 bytes
     # b"\x04\x08\x00\x00\x01\x01\x27\x9c" # one byte?
     # b'\x04\x08\x00\x1d\xa8\x04\xd1\xed' # 4 bytes for adas mode
@@ -308,6 +307,30 @@ def create_checksum(msg):
     return CRC # Returns as one 16bit integer
 
 
+
+# def asRadians(degrees):
+#     return degrees * pi / 180
+
+# def getXYpos(relativeNullPoint, p):
+#     """ Calculates X and Y distances in meters.
+#     """
+#     deltaLatitude = p.latitude - relativeNullPoint.latitude
+#     deltaLongitude = p.longitude - relativeNullPoint.longitude
+#     latitudeCircumference = 40075160 * cos(asRadians(relativeNullPoint.latitude))
+#     resultX = deltaLongitude * latitudeCircumference / 360
+#     resultY = deltaLatitude * 40008000 / 360
+#     return resultX, resultY
+
+
+def latlongconvert(lat1, long1, lat2, long2):
+    lat_diff = lat1 - lat2
+    long_diff = long1 - long2
+    lat_m = lat_diff * 40008000 / 360
+    long_m = long_diff * 40075160 * math.cos(lat_diff) / 360
+
+
+
+
 def serial_callback():
     vts.delay_ms(100)
     msgIn = serial.read(serial.available())
@@ -324,29 +347,16 @@ def serial_callback():
         print()
         # if vts.sd_present() == True:
         #     if uploaded == 1:
-        #         f.write(b'SubConPoint')
+        #         f.write(b'TG1ConPoint')
         #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
         #     if uploaded == 2:
-        #         f.write(b'SubShape')
+        #         f.write(b'TG1Shape')
         #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
         #     if uploaded == 3:
-        #         f.write(b'SubShape')
+        #         f.write(b'TG1Shape')
         #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
         #         f.close()
-        # if '\x13\xde\xff\x01' in msgIn:
-        #     if vts.sd_present() == True:
-        #         f.write(bytes(msgIn[6:len(msgIn) - 2]))
-        #         print(bytes(msgIn[6:len(msgIn) - 2]))
-        #         print()
-        #     if uploaded == 11:
-        #         f.close()
-        # else:
-        #     if vts.sd_present() == True:
-        #         f.write(bytes(msgIn[2:len(msgIn) - 2]))
-        #         print(bytes(msgIn[2:len(msgIn) - 2]))
-        #         print()
-        #     if uploaded == 11:
-        #         f.close()
+
             
 
 def set_cp_number(btn):
@@ -662,9 +672,6 @@ def save(l):
                 f.write(us.pack('>d', i))
         for vals in GV.cp_list:
             for i in vals:
-                print("CP")
-                print(i)
-                print(us.pack('>d', i))
                 f.write(us.pack('>d', i))
         for i in range(24 - len(GV.cp_list)):
             f.write(us.pack('>f', -6500000.00))
@@ -684,7 +691,7 @@ def save(l):
 
 def upload_points(l):
     global uploaded, f
-    f = open("read_file", 'wb')
+    f = open("start", 'wb')
     print("set quiet")
     serial.write(Commands.set_quiet)
     serial_callback()
@@ -692,21 +699,8 @@ def upload_points(l):
     serial.write(Commands.get_seed)
     serial_callback()
     serial_callback()
-    print("start")
-    serial.write(Commands.adas_start)
+    serial.write(bytes(Commands.adas_start))
     serial_callback()
-    # print("upload - SubjectContactPoint")
-    # uploaded = 1
-    # serial.write(bytes(Commands.upload))
-    # serial_callback()
-    # print("upload1")
-    # uploaded = 2
-    # serial.write(bytes(Commands.upload1))
-    # serial_callback()
-    # print("upload2")
-    # uploaded = 3
-    # serial.write(bytes(Commands.upload2))
-    # serial_callback()
 
 
 def redraw_cb(b):
