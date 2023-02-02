@@ -45,16 +45,16 @@ vehicle_option_dir = {
 
 backlight.set(5000)
 
-# SubjectContactPoint = bytearray(48)
+SubjectContactPoint = bytearray(b'\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\x00\x00\x00\x00' * 3)
 SubjectVehicleShape_0 = bytearray(256)
 SubjectVehicleShape_1 = bytearray(128)
-# Target1ContactPoint = bytearray(16)
+Target1ContactPoint = bytearray(b'\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\x00\x00\x00\x00')
 Target1VehicleShape_0 = bytearray(256)
 Target1VehicleShape_1 = bytearray(128)
-# Target2ContactPoint = bytearray(16)
+Target2ContactPoint = bytearray(b'\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\x00\x00\x00\x00')
 Target2VehicleShape_0 = bytearray(256)
 Target2VehicleShape_1 = bytearray(128)
-# Target3ContactPoint = bytearray(16)
+Target3ContactPoint = bytearray(b'\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\x00\x00\x00\x00')
 Target3VehicleShape_0 = bytearray(256)
 Target3VehicleShape_1 = bytearray(128)
 
@@ -307,30 +307,6 @@ def create_checksum(msg):
     return CRC # Returns as one 16bit integer
 
 
-
-# def asRadians(degrees):
-#     return degrees * pi / 180
-
-# def getXYpos(relativeNullPoint, p):
-#     """ Calculates X and Y distances in meters.
-#     """
-#     deltaLatitude = p.latitude - relativeNullPoint.latitude
-#     deltaLongitude = p.longitude - relativeNullPoint.longitude
-#     latitudeCircumference = 40075160 * cos(asRadians(relativeNullPoint.latitude))
-#     resultX = deltaLongitude * latitudeCircumference / 360
-#     resultY = deltaLatitude * 40008000 / 360
-#     return resultX, resultY
-
-
-def latlongconvert(lat1, long1, lat2, long2):
-    lat_diff = lat1 - lat2
-    long_diff = long1 - long2
-    lat_m = lat_diff * 40008000 / 360
-    long_m = long_diff * 40075160 * math.cos(lat_diff) / 360
-
-
-
-
 def serial_callback():
     vts.delay_ms(100)
     msgIn = serial.read(serial.available())
@@ -345,19 +321,7 @@ def serial_callback():
     else:
         print(msgIn[3:len(msgIn) - 2])
         print()
-        # if vts.sd_present() == True:
-        #     if uploaded == 1:
-        #         f.write(b'TG1ConPoint')
-        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
-        #     if uploaded == 2:
-        #         f.write(b'TG1Shape')
-        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
-        #     if uploaded == 3:
-        #         f.write(b'TG1Shape')
-        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
-        #         f.close()
 
-            
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
@@ -690,8 +654,9 @@ def save(l):
 
 
 def upload_points(l):
+    print(GV.antennaAcoords)
     global uploaded, f
-    f = open("start", 'wb')
+    f = open("read_file", 'wb')
     print("set quiet")
     serial.write(Commands.set_quiet)
     serial_callback()
@@ -699,9 +664,7 @@ def upload_points(l):
     serial.write(Commands.get_seed)
     serial_callback()
     serial_callback()
-    serial.write(bytes(Commands.adas_start))
-    serial_callback()
-
+    
 
 def redraw_cb(b):
     ball.update()
