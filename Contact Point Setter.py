@@ -20,7 +20,6 @@ PURPLE = const(0xFF00FF)
 ORANGE = const(0xFF8000)
 gnss_status = False
 
-
 antennaA = const(0)
 antennaB = const(1)
 points = const(2)
@@ -45,16 +44,16 @@ vehicle_option_dir = {
 
 backlight.set(5000)
 
-# SubjectContactPoint = bytearray(48)
+SubjectContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00' * 3)
 SubjectVehicleShape_0 = bytearray(256)
 SubjectVehicleShape_1 = bytearray(128)
-# Target1ContactPoint = bytearray(16)
+Target1ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 Target1VehicleShape_0 = bytearray(256)
 Target1VehicleShape_1 = bytearray(128)
-# Target2ContactPoint = bytearray(16)
+Target2ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 Target2VehicleShape_0 = bytearray(256)
 Target2VehicleShape_1 = bytearray(128)
-# Target3ContactPoint = bytearray(16)
+Target3ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 Target3VehicleShape_0 = bytearray(256)
 Target3VehicleShape_1 = bytearray(128)
 
@@ -274,6 +273,7 @@ def gnss_callback():
     global sample
     while vbox.samples_pending():
         sample = vbox.get_sample_hp()
+        print(sample)
         set_sats_status(gnss_status)
         GV.sats[0] = "{}".format(sample.sats_used)
         if sample.sats_used > 3:
@@ -307,27 +307,8 @@ def create_checksum(msg):
     return CRC # Returns as one 16bit integer
 
 
-
-# def asRadians(degrees):
-#     return degrees * pi / 180
-
-# def getXYpos(relativeNullPoint, p):
-#     """ Calculates X and Y distances in meters.
-#     """
-#     deltaLatitude = p.latitude - relativeNullPoint.latitude
-#     deltaLongitude = p.longitude - relativeNullPoint.longitude
-#     latitudeCircumference = 40075160 * cos(asRadians(relativeNullPoint.latitude))
-#     resultX = deltaLongitude * latitudeCircumference / 360
-#     resultY = deltaLatitude * 40008000 / 360
-#     return resultX, resultY
-
-
-def latlongconvert(lat1, long1, lat2, long2):
-    lat_diff = lat1 - lat2
-    long_diff = long1 - long2
-    lat_m = lat_diff * 40008000 / 360
-    long_m = long_diff * 40075160 * math.cos(lat_diff) / 360
-
+def pack():
+    # use x_m and y_m that are saved to pack
 
 
 
@@ -342,20 +323,20 @@ def serial_callback():
         unlock_bytearray = bytearray(unlock_without_crc)
         vbox.rlcrc(unlock_bytearray, 4)
         serial.write(bytes(unlock_bytearray))
-    else:
-        print(msgIn[3:len(msgIn) - 2])
-        print()
-        # if vts.sd_present() == True:
-        #     if uploaded == 1:
-        #         f.write(b'TG1ConPoint')
-        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
-        #     if uploaded == 2:
-        #         f.write(b'TG1Shape')
-        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
-        #     if uploaded == 3:
-        #         f.write(b'TG1Shape')
-        #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
-        #         f.close()
+    # else:
+    #     print(msgIn[3:len(msgIn) - 2])
+    #     print()
+    #     # if vts.sd_present() == True:
+    #     #     if uploaded == 1:
+    #     #         f.write(b'TG1ConPoint')
+    #     #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
+    #     #     if uploaded == 2:
+    #     #         f.write(b'TG1Shape')
+    #     #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
+    #     #     if uploaded == 3:
+    #     #         f.write(b'TG1Shape')
+    #     #         f.write(bytes(msgIn[3:len(msgIn) - 2]))
+    #     #         f.close()
 
             
 
@@ -699,8 +680,7 @@ def upload_points(l):
     serial.write(Commands.get_seed)
     serial_callback()
     serial_callback()
-    serial.write(bytes(Commands.adas_start))
-    serial_callback()
+    pack()
 
 
 def redraw_cb(b):
