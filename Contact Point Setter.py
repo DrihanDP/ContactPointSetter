@@ -78,6 +78,8 @@ class GV:
     rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
     reset_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
     antenna_b = []
+    full_message = b'' 
+    full_message1 = b''
 
 
 class ball_position: # x position information 
@@ -273,7 +275,6 @@ def gnss_callback():
     global sample
     while vbox.samples_pending():
         sample = vbox.get_sample_hp()
-        print(sample)
         set_sats_status(gnss_status)
         GV.sats[0] = "{}".format(sample.sats_used)
         if sample.sats_used > 3:
@@ -307,7 +308,21 @@ def create_checksum(msg):
     return CRC # Returns as one 16bit integer
 
 
-def pack():
+def upload():
+    # TODO change so that it does less than 24 contact points and upload
+    if GV.vehicle_option_str == "Subject":
+        for vals in GV.point_list:
+            long_m = us.pack('>f', vals[3])
+            lat_m = us.pack('>f', vals[2])
+            if len(GV.full_message) < 256:
+                GV.full_message += long_m + lat_m + b'\x00\x00\x00\x00\x00\x00\x00\x00'
+            else:
+                GV.full_message1 += long_m + lat_m + b'\x00\x00\x00\x00\x00\x00\x00\x00'
+        print("full message")
+        print(GV.full_message)
+        print("full message1")
+        print(GV.full_message1)
+        
     # use x_m and y_m that are saved to pack
 
 
@@ -323,7 +338,6 @@ def serial_callback():
         unlock_bytearray = bytearray(unlock_without_crc)
         vbox.rlcrc(unlock_bytearray, 4)
         serial.write(bytes(unlock_bytearray))
-
 
 
 def set_cp_number(btn):
@@ -667,7 +681,7 @@ def upload_points(l):
     serial.write(Commands.get_seed)
     serial_callback()
     serial_callback()
-    pack()
+    upload()
 
 
 def redraw_cb(b):
