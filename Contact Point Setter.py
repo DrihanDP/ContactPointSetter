@@ -20,7 +20,6 @@ PURPLE = const(0xFF00FF)
 ORANGE = const(0xFF8000)
 gnss_status = False
 
-
 antennaA = const(0)
 antennaB = const(1)
 points = const(2)
@@ -45,16 +44,16 @@ vehicle_option_dir = {
 
 backlight.set(5000)
 
-SubjectContactPoint = bytearray(b'\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\x00\x00\x00\x00' * 3)
+SubjectContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00' * 3)
 SubjectVehicleShape_0 = bytearray(256)
 SubjectVehicleShape_1 = bytearray(128)
-Target1ContactPoint = bytearray(b'\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\x00\x00\x00\x00')
+Target1ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 Target1VehicleShape_0 = bytearray(256)
 Target1VehicleShape_1 = bytearray(128)
-Target2ContactPoint = bytearray(b'\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\x00\x00\x00\x00')
+Target2ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 Target2VehicleShape_0 = bytearray(256)
 Target2VehicleShape_1 = bytearray(128)
-Target3ContactPoint = bytearray(b'\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\xCA\xC6\x5D\x40\x00\x00\x00\x00')
+Target3ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 Target3VehicleShape_0 = bytearray(256)
 Target3VehicleShape_1 = bytearray(128)
 
@@ -274,6 +273,7 @@ def gnss_callback():
     global sample
     while vbox.samples_pending():
         sample = vbox.get_sample_hp()
+        print(sample)
         set_sats_status(gnss_status)
         GV.sats[0] = "{}".format(sample.sats_used)
         if sample.sats_used > 3:
@@ -307,6 +307,11 @@ def create_checksum(msg):
     return CRC # Returns as one 16bit integer
 
 
+def pack():
+    # use x_m and y_m that are saved to pack
+
+
+
 def serial_callback():
     vts.delay_ms(100)
     msgIn = serial.read(serial.available())
@@ -318,9 +323,7 @@ def serial_callback():
         unlock_bytearray = bytearray(unlock_without_crc)
         vbox.rlcrc(unlock_bytearray, 4)
         serial.write(bytes(unlock_bytearray))
-    else:
-        print(msgIn[3:len(msgIn) - 2])
-        print()
+
 
 
 def set_cp_number(btn):
@@ -664,7 +667,8 @@ def upload_points(l):
     serial.write(Commands.get_seed)
     serial_callback()
     serial_callback()
-    
+    pack()
+
 
 def redraw_cb(b):
     ball.update()
