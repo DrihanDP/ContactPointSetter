@@ -45,17 +45,17 @@ vehicle_option_dir = {
 backlight.set(5000)
 
 SubjectContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00' * 3)
-SubjectVehicleShape_0 = bytearray(256)
-SubjectVehicleShape_1 = bytearray(128)
+# SubjectVehicleShape_0 = bytearray(256)
+# SubjectVehicleShape_1 = bytearray(128)
 Target1ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
-Target1VehicleShape_0 = bytearray(256)
-Target1VehicleShape_1 = bytearray(128)
+# Target1VehicleShape_0 = bytearray(256)
+# Target1VehicleShape_1 = bytearray(128)
 Target2ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
-Target2VehicleShape_0 = bytearray(256)
-Target2VehicleShape_1 = bytearray(128)
+# Target2VehicleShape_0 = bytearray(256)
+# Target2VehicleShape_1 = bytearray(128)
 Target3ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
-Target3VehicleShape_0 = bytearray(256)
-Target3VehicleShape_1 = bytearray(128)
+# Target3VehicleShape_0 = bytearray(256)
+# Target3VehicleShape_1 = bytearray(128)
 
 uploaded = 0
 
@@ -78,8 +78,8 @@ class GV:
     rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
     reset_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
     antenna_b = []
-    full_message = b'' 
-    full_message1 = b''
+    byte_message1 = b'' 
+    byte_message2 = b''
 
 
 class ball_position: # x position information 
@@ -309,22 +309,53 @@ def create_checksum(msg):
 
 
 def upload():
-    # TODO change so that it does less than 24 contact points and upload
+    # TODO check antenna b, height, and initial contact point stuff "SubjectContactPoint"
+    # TODO add "confirm upload" screen
+    for vals in GV.point_list:
+        long_m = us.pack('>f', vals[3])
+        lat_m = us.pack('>f', vals[2])
+        if len(GV.byte_message1) < 256:
+            GV.byte_message1 += long_m + lat_m + b'\x00\x00\x00\x00\x00\x00\x00\x00'
+        else:
+            GV.byte_message2 += long_m + lat_m + b'\x00\x00\x00\x00\x00\x00\x00\x00'
+    if len(GV.byte_message1) != 256:
+        while len(GV.byte_message1) != 256:
+            GV.byte_message1 += b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00\x00\x00\x00\x00'
+    if len(GV.byte_message2) != 128:
+        while len(GV.byte_message2) != 128:
+            GV.byte_message2 += b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00\x00\x00\x00\x00'
     if GV.vehicle_option_str == "Subject":
-        for vals in GV.point_list:
-            long_m = us.pack('>f', vals[3])
-            lat_m = us.pack('>f', vals[2])
-            if len(GV.full_message) < 256:
-                GV.full_message += long_m + lat_m + b'\x00\x00\x00\x00\x00\x00\x00\x00'
-            else:
-                GV.full_message1 += long_m + lat_m + b'\x00\x00\x00\x00\x00\x00\x00\x00'
-        print("full message")
-        print(GV.full_message)
-        print("full message1")
-        print(GV.full_message1)
-        
-    # use x_m and y_m that are saved to pack
-
+        full_message1 = bytearray(b'\x03\x00\x00\x17\x48' + GV.byte_message1 + b'\x00\x00')
+        full_message2 = bytearray(b'\x03\x80\x00\x18\x48' + GV.byte_message2 + b'\x00\x00')
+        vbox.rlcrc(full_message1, 261)
+        vbox.rlcrc(full_message2, 133)
+        serial.write(bytes(SubjectContactPoint))
+        serial.write(bytes(full_message1))
+        serial.write(bytes(full_message2))
+    elif GV.vehicle_option_str == "Target 1":
+        full_message1 = bytearray(b'\x03\x00\x00\x18\xd8' + GV.byte_message1 + b'\x00\x00')
+        full_message2 = bytearray(b'\x03\x80\x00\x19\x58' + GV.byte_message2 + b'\x00\x00')
+        vbox.rlcrc(full_message1, 261)
+        vbox.rlcrc(full_message2, 133)
+        serial.write(bytes(Target1ContactPoint))
+        serial.write(bytes(full_message1))
+        serial.write(bytes(full_message2))
+    elif GV.vehicle_option_str == "Target 2":
+        full_message1 = bytearray(b'\x03\x00\x00\x1a\x68' + GV.byte_message1 + b'\x00\x00')
+        full_message2 = bytearray(b'\x03\x80\x00\x1b\x68' + GV.byte_message2 + b'\x00\x00')
+        vbox.rlcrc(full_message1, 261)
+        vbox.rlcrc(full_message2, 133)
+        serial.write(bytes(Target2ContactPoint))
+        serial.write(bytes(full_message1))
+        serial.write(bytes(full_message2))
+    elif GV.vehicle_option_str == "Target 3":
+        full_message1 = bytearray(b'\x03\x00\x00\x1b\xf8' + GV.byte_message1 + b'\x00\x00')
+        full_message2 = bytearray(b'\x03\x80\x00\x1c\xf8' + GV.byte_message2 + b'\x00\x00')
+        vbox.rlcrc(full_message1, 261)
+        vbox.rlcrc(full_message2, 133)
+        serial.write(bytes(Target3ContactPoint))
+        serial.write(bytes(full_message1))
+        serial.write(bytes(full_message2))
 
 
 def serial_callback():
@@ -414,6 +445,8 @@ def reset_cp(l): # completely resets all of the check points and antennas
     GV.antenna_b = []
     ball.mid_vals(0, 0)
     GV.a_set = False
+    GV.byte_message1 = b''
+    GV.byte_message2 = b''
     speaker.play_sound(2)
     vts.delay_ms(1000)
     GV.reset_warning[0] = gui.DL_VERTEX_TRANSLATE_X(1000)
