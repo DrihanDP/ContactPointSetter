@@ -49,7 +49,6 @@ Target1ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x
 Target2ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 Target3ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 
-
 # Global variables
 class GV:
     x_scale = ["10m"]
@@ -157,7 +156,7 @@ class Point:
                         self.set_b,
                         [gui.DL_END()],
                         ]
-    #TODO Get "A" and "B" in the middle
+        
     def set_contact_point(self, point, x, y): # Sets contact point and fills the NOP position
         if 0 < point < (len(self.set_points)):
             self.set_points[point][0] = gui.DL_VERTEX2F(x, y)
@@ -205,7 +204,7 @@ class Point_position:
         self.point_y_m = self.point_y_m
         self.point_pixel_x = self.point_pixel_x
         self.point_pixel_y = self.point_pixel_y
-
+    
     def get_point_position(point_lat, point_long, point_x_m, point_y_m, point_pixel_x, point_pixel_y):
         GV.point_list.append([point_lat, point_long, point_x_m, point_y_m, point_pixel_x, point_pixel_y])
     
@@ -213,7 +212,7 @@ class Point_position:
         GV.point_list.pop(-1)
 
 
-class Commands:
+class Commands: # commands to be sent to the VB3i to unlock the EEPROM
     get_seed = b"\x12\x04\x25\x95"
     set_quiet = b"\x07\x06\02\xFF\x9b\x1f"
     set_noise = b"\x07\x06\x02\x00\x85\xef"
@@ -270,7 +269,6 @@ def create_checksum(msg):
 
 
 def upload():
-    # TODO check antenna b, height, and initial contact point stuff "SubjectContactPoint"
     byte_message1 = b''
     byte_message2 = b''
     for vals in GV.point_list:
@@ -671,6 +669,8 @@ def save(l):
 
 
 def upload_points(l):
+    global f, uploaded
+    f = open('read_file', 'wb')
     vts.leds(0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     vts.delay_ms(500)
     vts.leds(0, 20, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0)
