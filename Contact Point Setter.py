@@ -57,8 +57,6 @@ Target3ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x
 # Target3VehicleShape_0 = bytearray(256)
 # Target3VehicleShape_1 = bytearray(128)
 
-uploaded = 0
-
 # Global variables
 class GV:
     x_scale = ["10m"]
@@ -96,13 +94,13 @@ class ball_position: # x position information
         self.mid_lat = mid_lat
         self.mid_long = mid_long
 
-    def update(self): # updates ball position position
+    def update(self): # updates cross position
         gui_list[8][0] = gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y - 8)
         gui_list[9][0] = gui.DL_VERTEX2F(ball.ball_pos_x + 6, ball.ball_pos_y + 8)
         gui_list[13][0] = gui.DL_VERTEX2F(ball.ball_pos_x + 6, ball.ball_pos_y - 8)
         gui_list[14][0] = gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y + 8)
 
-    def update_vals(self, ball_pos_x, ball_pos_y): # moves the ball 
+    def update_vals(self, ball_pos_x, ball_pos_y): # moves the cross 
         self.ball_pos_x = ball_pos_x
         self.ball_pos_y = ball_pos_y
 
