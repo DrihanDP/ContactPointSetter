@@ -43,7 +43,7 @@ vehicle_option_dir = {
 }
 
 backlight.set(5000)
-
+# Bytearrays containing the "no information" bytes
 SubjectContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00' * 3)
 Target1ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
 Target2ContactPoint = bytearray(b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00')
@@ -65,7 +65,7 @@ class GV:
     a_set = False
     point_list = []
     vehicle_option_str = "Subject"
-    rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
+    rtk_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)] # warnings to appear off screen until needed
     reset_warning = [gui.DL_VERTEX_TRANSLATE_X(1000)]
     upload_confirm = [gui.DL_VERTEX_TRANSLATE_X(2000)]
     antenna_b = []
@@ -86,7 +86,7 @@ class ball_position: # x position information
         self.mid_long = mid_long
 
     def update(self): # updates cross position
-        gui_list[8][0] = gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y - 8)
+        gui_list[8][0] = gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y - 8) # draws start point and end point
         gui_list[9][0] = gui.DL_VERTEX2F(ball.ball_pos_x + 6, ball.ball_pos_y + 8)
         gui_list[13][0] = gui.DL_VERTEX2F(ball.ball_pos_x + 6, ball.ball_pos_y - 8)
         gui_list[14][0] = gui.DL_VERTEX2F(ball.ball_pos_x - 6, ball.ball_pos_y + 8)
@@ -135,7 +135,7 @@ class Point:
         self.set_b = [
             [gui.DL_NOP()],
         ]
-        self.point_gui_list = [gui.SUBLIST, # creates a point when set is pressed
+        self.point_gui_list = [gui.SUBLIST, # creates a contact point when set is pressed
                         self.stored_points_colour,
                         [gui.DL_POINT_SIZE(8)],
                         [gui.DL_BEGIN(gui.PRIM_POINTS)],
@@ -216,9 +216,8 @@ class Commands: # commands to be sent to the VB3i to unlock the EEPROM
     get_seed = b"\x12\x04\x25\x95"
     set_quiet = b"\x07\x06\02\xFF\x9b\x1f"
     set_noise = b"\x07\x06\x02\x00\x85\xef"
-    restart_stream = b"\x07\x06\x02\x00\x85\xef"
 
-    
+
 def position_calc(): # calculates the position of the ball on the screen
     global x_dist, y_dist
     if GV.a_set == False:
@@ -240,15 +239,15 @@ def gnss_callback():
         if sample.sats_used > 3:
             GV.lat[0] = "{:04.5f}".format((sample.lat_degE7)/10000000)
             GV.long[0] = "{:04.5f}".format((sample.lng_degE7)/10000000)
-            if sample.fix_type > 1: # == vbox.VBOX_FIXTYPE_RTK_FIXED:
+            if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
                 if ball.mid_lat == 0 and ball.mid_long == 0:
                     ball.mid_vals(((sample.lat_degE7)/10000000), ((sample.lng_degE7)/10000000))
                     ball.update_vals(200, 270)
                     ball.update()
                 else:
                     position_calc()
-        # if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
-        #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
+        if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED:
+            GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(800)
 
 
 def create_checksum(msg):
@@ -269,27 +268,27 @@ def create_checksum(msg):
 
 
 def upload():
-    byte_message1 = b''
+    byte_message1 = b''  # creates empty bytes to be filled
     byte_message2 = b''
-    for vals in GV.point_list:
+    for vals in GV.point_list: # iterates through the contact points list and packs relevant information to a 32 bit float
         long_m = us.pack('>f', vals[3])
         lat_m = us.pack('>f', vals[2])
-        if len(byte_message1) < 256:
+        if len(byte_message1) < 256: # adds the packed values to the relevant byte messages
             byte_message1 += long_m + lat_m + b'\x00\x00\x00\x00\x00\x00\x00\x00'
         else:
             byte_message2 += long_m + lat_m + b'\x00\x00\x00\x00\x00\x00\x00\x00'
-    if len(byte_message1) != 256:
+    if len(byte_message1) != 256: # if the message length is not correct add "blank" data
         while len(byte_message1) != 256:
             byte_message1 += b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00\x00\x00\x00\x00'
     if len(byte_message2) != 128:
         while len(byte_message2) != 128:
             byte_message2 += b'\xca\xc6\x5d\x40\xca\xc6\x5d\x40\x00\x00\x00\x00\x00\x00\x00\x00'
-    if GV.vehicle_option_str == "Subject":
-        full_message1 = bytearray(b'\x03\x00\x00\x17\x48' + byte_message1 + b'\x00\x00')
+    if GV.vehicle_option_str == "Subject": # checks which mode is selected
+        full_message1 = bytearray(b'\x03\x00\x00\x17\x48' + byte_message1 + b'\x00\x00') # byte array which combines the byte message and memory address information
         full_message2 = bytearray(b'\x03\x80\x00\x18\x48' + byte_message2 + b'\x00\x00')
-        vbox.rlcrc(full_message1, 261)
+        vbox.rlcrc(full_message1, 261) # creates checksum for the messages
         vbox.rlcrc(full_message2, 133)
-        serial.write(bytes(SubjectContactPoint))
+        serial.write(bytes(SubjectContactPoint)) # sends messages to the EEPROM
         serial.write(bytes(full_message1))
         serial.write(bytes(full_message2))
     elif GV.vehicle_option_str == "Target 1":
@@ -320,21 +319,21 @@ def upload():
 
 def serial_callback():
     vts.delay_ms(100)
-    msgIn = serial.read(serial.available())
-    if msgIn[0:2] == b'\xff\x01' and len(msgIn) == 6:
-        crc_int = create_checksum(msgIn[2:4])
-        crc_bytes = crc_int.to_bytes(2, 'big')
-        unlock_without_crc = b'\x13\x06' + crc_bytes + bytearray(2)
+    msgIn = serial.read(serial.available()) # incoming serial message
+    if msgIn[0:2] == b'\xff\x01' and len(msgIn) == 6: # checks to see if the reply is a get_seed high and low byte
+        crc_int = create_checksum(msgIn[2:4]) # creates a polynomial checksum
+        crc_bytes = crc_int.to_bytes(2, 'big') # changes ints to bytes
+        unlock_without_crc = b'\x13\x06' + crc_bytes + bytearray(2) # creates get_seed response
         unlock_bytearray = bytearray(unlock_without_crc)
-        vbox.rlcrc(unlock_bytearray, 4)
-        serial.write(bytes(unlock_bytearray))
+        vbox.rlcrc(unlock_bytearray, 4) # creates checksum for response
+        serial.write(bytes(unlock_bytearray)) # sends response to unlock EEPROM
 
 
 def set_cp_number(btn):
     GV.cp_number = btn.current
 
 
-def vehicle_option(btn):
+def vehicle_option(btn): # options for the looping button
     if btn.current == "Subject":
         GV.vehicle_option_str = "Subject"
     elif btn.current == "Target 1":
@@ -345,7 +344,7 @@ def vehicle_option(btn):
         GV.vehicle_option_str = "Target 3"
 
 
-def set_antenna_or_cp(btn):
+def set_antenna_or_cp(btn): # options for the looping button
     if btn.current == "Points":
         GV.set_button = "Points"
     elif btn.current == "Antenna A":
@@ -354,7 +353,7 @@ def set_antenna_or_cp(btn):
         GV.set_button = "Antenna B"
 
 
-def coldstart_cb(l):
+def coldstart_cb(l): #coldstart command with user feedback
     gnss.command(b'\xb5\x62\x06\x04\x04\x00\xff\xff\x02\x00\x0e\x61')
     speaker.play_sound(2)
     GV.lat[0] = "000.00000"
@@ -497,7 +496,7 @@ def set_sats_status(state): # sets satellite counter colour depending on fix typ
 
 def set_cp(l): # sets contact point when 'set' is pressed 
     global sample
-    if sample.fix_type > 1: #== vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
+    if sample.fix_type == vbox.VBOX_FIXTYPE_RTK_FIXED: # ensures there are RTK corrections
         if GV.a_set == True: # ensures antenna A is set first
             if GV.set_button == "Points":
                 if len(GV.cp_list) < 24:
@@ -531,9 +530,9 @@ def set_cp(l): # sets contact point when 'set' is pressed
                     speaker.play_sound(4)
             else:
                 pass
-    # else: 
-    #     speaker.play_sound(1)
-    #     GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
+    else: 
+        speaker.play_sound(1)
+        GV.rtk_warning[0] = gui.DL_VERTEX_TRANSLATE_X(0)
 
 
 def delete_last_point(l): # deletes the last point depending on the what is being set
@@ -670,7 +669,6 @@ def save(l):
 
 def upload_points(l):
     global f, uploaded
-    f = open('read_file', 'wb')
     vts.leds(0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     vts.delay_ms(500)
     vts.leds(0, 20, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0)
@@ -767,7 +765,7 @@ def main_screen(): # display list
         [gui.CTRL_TEXT, 500, 170, 30, gui.OPT_CENTERX, 'Save to SD'],
         [gui.CTRL_TEXT, 700, 170, 30, gui.OPT_CENTERX, 'Serial upload'],
         [gui.CTRL_TEXT, 500, 70, 30, gui.OPT_CENTERX, 'Coldstart'],
-        [gui.CTRL_TEXT, 700, 70, 30, gui.OPT_CENTERX, 'Submode'],
+        [gui.CTRL_TEXT, 700, 70, 30, gui.OPT_CENTERX, 'Mode'],
     ])
     gui_list.extend(button_options())
     gui_list.extend([
@@ -824,13 +822,13 @@ def main_screen(): # display list
 
 def main():
     global bank, antenna_or_cp_button, ball, point, subject_or_target, speaker
-    antenna_or_cp_button = LoopingButton(620, 310, 160, 60, [x[0] for x in antenna_dir.values()], 30, set_antenna_or_cp)
+    antenna_or_cp_button = LoopingButton(620, 310, 160, 60, [x[0] for x in antenna_dir.values()], 30, set_antenna_or_cp) # creates looping buttons
     subject_or_target = LoopingButton(620, 110, 160, 60, [x[0] for x in vehicle_option_dir.values()], 30, vehicle_option)
     ball = ball_position()
     point = Point()
     speaker = Speaker(255)
-    path = os.getcwd() + '/'
-    bank = Image_Bank((
+    path = os.getcwd() + '/' # creates path for images
+    bank = Image_Bank(( # paths for various images
         (path + '/icon-reset.png', 'Reset'),
         (path + '/icons8-gnss-50.png', 'GNSS'),
         (path + '/centre_icon.png', 'Centre')
@@ -851,8 +849,11 @@ def main():
     serial.open(115200)
     serial.set_callback(serial_callback)
     vbox.set_new_data_callback(gnss_callback)
-    # vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
-    # vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
-    # vbox.cfg_gnss({'DGPS Baudrate':115200}) # Set RTK Baud rate to 115200 - May need settings option in future
+    vts.config({'serialREPL': 0, 'serialUSER': 0, 'serialConn': 0})
+    vts.config({'serialREPL': 2, 'serialUSER': 1,})
+    vts.config({'serialConn': 1}) # Connect Serial port 1 directly to GNSS engine port
+    vbox.cfg_gnss({'UART2 Output': [('NMEA', 'GGA', 5)]}) # Enable GGA message output for NTRIP
+    vbox.cfg_gnss({'DGPS Baudrate':115200}) # Set RTK Baud rate to 115200 - May need settings option in future
+    serial.open(115200)
 
 main()
